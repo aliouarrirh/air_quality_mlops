@@ -12,12 +12,13 @@ xgboost>=2.0.0
 lightgbm>=4.3.0
 
 # ── Time Series ──────────────────────────────────────────────────────────────
-prophet>=1.1.5
+#prophet>=1.1.5
 statsmodels>=0.14.0
 
 # ── Deep Learning (LSTM) ──────────────────────────────────────────────────────
-torch>=2.2.0
-# tensorflow>=2.16.0     # alternative si LSTM via Keras
+#torch>=2.2.0
+tensorboard
+tensorflow>=2.16.0     # alternative si LSTM via Keras
 
 # ── EDA / Visualisation ──────────────────────────────────────────────────────
 matplotlib>=3.8.0
@@ -34,10 +35,12 @@ uvicorn[standard]>=0.29.0
 pydantic>=2.6.0
 
 # ── Orchestration ─────────────────────────────────────────────────────────────
-apache-airflow>=2.9.0    # optionnel si Docker Compose
+#apache-airflow>=2.9.0    # optionnel si Docker Compose
 
 # ── Utilitaires ──────────────────────────────────────────────────────────────
 python-dotenv>=1.0.0
 tqdm>=4.66.0
 joblib>=1.3.0
 holidays>=0.46           # jours fériés Maroc
+
+SQLAlchemy>=2.0.0
