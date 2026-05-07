@@ -1,5 +1,25 @@
 import os
 import sys
+import logging
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(current_dir)
+sys.path.append(project_root)
+
+log_dir = os.path.join(project_root, "logs")
+os.makedirs(log_dir, exist_ok=True)
+log_file = os.path.join(log_dir, "xgboost.log")
+
+sys.stdout.reconfigure(encoding='utf-8')
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler(log_file, encoding='utf-8', mode='w'),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+
 import pandas as pd
 import numpy as np
 import xgboost as xgb
@@ -7,18 +27,11 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 import mlflow
 import mlflow.xgboost
-import logging
-
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
-current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(current_dir)
-sys.path.append(project_root)
 
 from mlops.mlflow_config import setup_mlflow
 
 def train_model():
-    logging.info("🚀 Démarrage de l'entraînement XGBoost...")
+    logging.info("Démarrage de l'entraînement XGBoost...")
 
     setup_mlflow("PM25_Casablanca")
 
@@ -27,10 +40,12 @@ def train_model():
     df = pd.read_parquet(data_path)
 
     y = df['pm2p5']
-    colonnes_a_enlever = ['pm2p5']
+    colonnes_a_enlever = ['pm2p5','pm2p5_rolling_3h','pm2p5_rolling_24h']
     if 'datetime' in df.columns:
         colonnes_a_enlever.append('datetime')
-    X = df.drop(columns=colonnes_a_enlever)
+    if 'index' in df.columns: 
+        colonnes_a_enlever.append('index')
+    X = df.drop(columns=colonnes_a_enlever,errors="ignore")
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)
     logging.info(f"Taille de l'entraînement : {len(X_train)} lignes. Taille du test : {len(X_test)} lignes.")
@@ -46,7 +61,7 @@ def train_model():
         
         mlflow.log_params(params)
 
-        logging.info("Entraînement en cours... (ça va aller très vite !)")
+        logging.info("Entraînement XGBoost en cours...")
         model = xgb.XGBRegressor(**params)
         model.fit(X_train, y_train)
 
@@ -65,7 +80,7 @@ def train_model():
         mlflow.log_metric("r2", r2)
 
         mlflow.xgboost.log_model(model, "xgboost-model")
-        logging.info("✅ Modèle XGBoost enregistré dans MLflow avec succès !")
+        logging.info("Modèle XGBoost enregistré dans MLflow avec succès !")
 
 if __name__ == "__main__":
     train_model()
