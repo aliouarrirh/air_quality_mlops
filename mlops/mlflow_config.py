@@ -6,7 +6,8 @@ def setup_mlflow(experiment_name="Casa_AirQuality"):
     project_root = os.path.dirname(current_dir)
 
     db_path = os.path.join(project_root,"mlruns.db")
-    tracking_uri = f"sqlite://{db_path}"
+    db_path_uri = db_path.replace("\\", "/")
+    tracking_uri = f"sqlite://{db_path_uri}"
 
     mlflow.set_tracking_uri(tracking_uri)
     mlflow.set_experiment(experiment_name)
