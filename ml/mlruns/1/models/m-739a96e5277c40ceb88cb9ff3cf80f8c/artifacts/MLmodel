@@ -1,0 +1,21 @@
+artifact_path: file:///C:/Users/narji/Documents/Python_workspace/ADMIN/Casablanca_AirQuality/ml/mlruns/1/models/m-739a96e5277c40ceb88cb9ff3cf80f8c/artifacts
+flavors:
+  prophet:
+    code: null
+    data: model.pr
+    model_type: Prophet
+    prophet_version: 1.3.0
+  python_function:
+    data: model.pr
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.prophet
+    python_version: 3.11.0
+mlflow_version: 3.12.0
+model_id: m-739a96e5277c40ceb88cb9ff3cf80f8c
+model_size_bytes: 14631029
+model_uuid: m-739a96e5277c40ceb88cb9ff3cf80f8c
+prompts: null
+run_id: 08973839cf494e75932525911576c9f3
+utc_time_created: '2026-05-08 17:10:05.206101'

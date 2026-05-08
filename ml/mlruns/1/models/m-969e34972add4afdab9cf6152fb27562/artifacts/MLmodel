@@ -1,0 +1,30 @@
+artifact_path: file:///C:/Users/narji/Documents/Python_workspace/ADMIN/Casablanca_AirQuality/ml/mlruns/1/models/m-969e34972add4afdab9cf6152fb27562/artifacts
+flavors:
+  python_function:
+    data: data
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.tensorflow
+    python_version: 3.11.0
+  tensorflow:
+    code: null
+    data: data
+    keras_version: 2.21.0
+    model_type: keras
+    save_format: tf
+is_signature_from_type_hint: false
+mlflow_version: 3.12.0
+model_id: m-969e34972add4afdab9cf6152fb27562
+model_size_bytes: 172953
+model_uuid: m-969e34972add4afdab9cf6152fb27562
+prompts: null
+run_id: d0377fdf85134ebaae0e4c4b8c6c2ef5
+signature:
+  inputs: '[{"type": "tensor", "tensor-spec": {"dtype": "float64", "shape": [-1, 24,
+    10]}}]'
+  outputs: '[{"type": "tensor", "tensor-spec": {"dtype": "float32", "shape": [-1,
+    1]}}]'
+  params: null
+type_hint_from_example: false
+utc_time_created: '2026-05-08 17:08:14.470304'
