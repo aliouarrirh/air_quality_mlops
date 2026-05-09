@@ -14,8 +14,9 @@ logger = logging.getLogger("ETL_LOAD")
 
 DB_USER = os.getenv("DB_USER")
 DB_PASS = os.getenv("DB_PASS")
-DB_HOST = os.getenv("DB_HOST", "localhost")
-DB_PORT = os.getenv("DB_PORT", "5432")
+IN_DOCKER = os.path.exists("/opt/airflow/project")
+DB_HOST = "postgres" if IN_DOCKER else os.getenv("DB_HOST", "localhost")
+DB_PORT = "5432"    if IN_DOCKER else os.getenv("DB_PORT", "5433")
 DB_NAME = os.getenv("DB_NAME", "casablanca_aq")
 
 def load_predictions_to_postgres(timestamp, obs_pm25, pred_xgboost, pred_cams):
