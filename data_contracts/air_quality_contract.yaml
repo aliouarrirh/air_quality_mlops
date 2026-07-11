@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: DataContract
+metadata:
+  name: delhi-air-quality-raw
+  version: 1.0.0
+  owner: team-delhi-aq
+  description: Données qualité air Delhi — 35 stations via OpenAQ API v3
+  source:
+    name: OpenAQ
+    url: https://api.openaq.org/v3
+    license: US Public Domain / CC-BY
+    country: IN
+    city: Delhi
+
+schema:
+  fields:
+    - name: location_id
+      type: integer
+      required: true
+    - name: sensor_id
+      type: integer
+      required: true
+    - name: parameter
+      type: string
+      required: true
+      enum: [pm25, pm10, no2, so2, co, o3, bc]
+    - name: value
+      type: float
+      required: true
+    - name: unit
+      type: string
+      required: true
+      enum: ["µg/m³", "ppm", "ppb"]
+    - name: datetime_utc
+      type: timestamp
+      required: true
+      timezone: UTC
+    - name: datetime_local
+      type: timestamp
+      required: false
+      timezone: Asia/Kolkata
+
+quality:
+  completeness:
+    - field: datetime_utc
+      threshold: 100%
+    - field: value
+      threshold: 90%
+  validity:
+    - rule: pm25_range
+      expression: "parameter != 'pm25' OR (value >= 0 AND value <= 999)"
+    - rule: no_negatives
+      expression: "value >= 0"
+  freshness:
+    max_delay: 3h
+    check_table: delhi_latest
+    check_field: datetime_utc
+  integrity:
+    min_stations: 10
+    expected_parameters: [pm25, pm10, no2, co]
