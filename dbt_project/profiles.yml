@@ -1,0 +1,7 @@
+delhi_aq:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "data/delhi_air_quality.duckdb"
+      threads: 4

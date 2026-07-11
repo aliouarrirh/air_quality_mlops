@@ -1,0 +1,11 @@
+version: 2
+sources:
+  - name: raw
+    description: Données brutes ingérées par dlt depuis OpenAQ v3
+    tables:
+      - name: delhi_locations
+        description: Métadonnées des 35 stations de Delhi
+      - name: delhi_measurements
+        description: Séries temporelles par capteur et polluant
+      - name: delhi_latest
+        description: Snapshot temps réel

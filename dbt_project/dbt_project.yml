@@ -1,0 +1,14 @@
+name: delhi_air_quality
+version: '1.0.0'
+profile: delhi_aq
+model-paths: ["models"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+models:
+  delhi_air_quality:
+    staging:
+      materialized: view
+    intermediate:
+      materialized: view
+    marts:
+      materialized: table
