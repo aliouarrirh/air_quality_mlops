@@ -1,6 +1,6 @@
 -- =============================================================
--- init.sql — Tables du projet Casablanca Air Quality
--- La DB casablanca_aq est déjà créée par POSTGRES_DB dans Docker
+-- init.sql — Tables du projet Delhi Air Quality
+-- La DB delhi_aq est déjà créée par POSTGRES_DB dans Docker
 -- On se connecte directement et on crée les tables
 -- =============================================================
 
@@ -11,6 +11,9 @@ CREATE TABLE IF NOT EXISTS observations_reelles (
     pm2p5       FLOAT,
     pm10        FLOAT,
     no2         FLOAT,
+    so2         FLOAT,
+    co          FLOAT,
+    o3          FLOAT,
     temp_c      FLOAT,
     vent_kmh    FLOAT,
     blh_m       FLOAT,
@@ -19,14 +22,15 @@ CREATE TABLE IF NOT EXISTS observations_reelles (
 
 CREATE INDEX IF NOT EXISTS idx_obs_datetime ON observations_reelles(datetime DESC);
 
--- Table 2 : prédictions XGBoost + benchmark CAMS
+-- Table 2 : prédictions + AQI NAQI
 CREATE TABLE IF NOT EXISTS predictions (
     id           SERIAL PRIMARY KEY,
     datetime     TIMESTAMPTZ NOT NULL UNIQUE,
     pm25_observe FLOAT,
-    pm25_xgboost FLOAT,
-    pm25_cams    FLOAT,
-    depasse_oms  BOOLEAN DEFAULT FALSE,
+    pm25_predit  FLOAT,
+    aqi_predit   FLOAT,
+    aqi_category VARCHAR(20),
+    depasse_naqi BOOLEAN DEFAULT FALSE,
     inserted_at  TIMESTAMPTZ DEFAULT NOW()
 );
 

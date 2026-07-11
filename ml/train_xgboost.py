@@ -33,9 +33,9 @@ from mlops.mlflow_config import setup_mlflow
 def train_model():
     logging.info("Démarrage de l'entraînement XGBoost...")
 
-    setup_mlflow("PM25_Casablanca")
+    setup_mlflow("PM25_Delhi")
 
-    data_path = os.path.join(project_root, "data", "processed", "casablanca_master.parquet")
+    data_path = os.path.join(project_root, "data", "processed", "delhi_master.parquet")
     logging.info(f"Chargement des données depuis : {data_path}")
     df = pd.read_parquet(data_path)
 

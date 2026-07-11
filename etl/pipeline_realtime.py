@@ -43,21 +43,15 @@ else:
 # Indique à MLflow où chercher les artefacts
 os.environ["MLFLOW_ARTIFACT_ROOT"] = MLFLOW_ARTIFACT_ROOT
 
-MODEL_NAME    = "Casablanca_PM25_Predictor"
-MODEL_VERSION = "1"
+MODEL_NAME    = os.getenv("MLFLOW_MODEL_URI", "models:/DelhiAirQualityModel/Production")
+MODEL_VERSION = os.getenv("MODEL_VERSION", "2.0.0")
 
 
 def load_production_model():
-    logger.info(f"Artifact root : {MLFLOW_ARTIFACT_ROOT}")
+    logger.info(f"Chargement du modèle : {MODEL_NAME}")
     try:
-        # Chemin direct vers les artefacts — bypass complet du registry
-        model_uri = os.path.join(
-            MLFLOW_ARTIFACT_ROOT,
-            "1", "models", "m-379629a4ceff42968baf81b5abce4098", "artifacts"
-        )
-        logger.info(f"Chargement depuis : {model_uri}")
-        model = mlflow.pyfunc.load_model(model_uri)
-        logger.info("Binaire XGBoost chargé en mémoire vive.")
+        model = mlflow.pyfunc.load_model(MODEL_NAME)
+        logger.info("Modèle Delhi chargé en mémoire vive.")
         return model
     except Exception as e:
         logger.error(f"MLflow Model Registry unreachable : {str(e)}")

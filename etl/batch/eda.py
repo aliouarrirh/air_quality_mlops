@@ -84,7 +84,7 @@ def plot_pm25_timeseries(df: pd.DataFrame) -> Path:
     axes[0].plot(daily.index, daily.values, linewidth=0.8, color="#2196f3", alpha=0.8)
     axes[0].fill_between(daily.index, daily.values, alpha=0.15, color="#2196f3")
     axes[0].axhline(y=15, color="orange", linestyle="--", linewidth=1, label="OMS 24h (15 µg/m³)")
-    axes[0].set_title("PM2.5 journalier moyen — Casablanca")
+    axes[0].set_title("PM2.5 journalier moyen — Delhi")
     axes[0].set_ylabel("PM2.5 (µg/m³)")
     axes[0].legend(fontsize=9)
 
@@ -237,7 +237,7 @@ def generate_html_report(stats: dict, figures: list[Path], data_preview_html: st
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>EDA — Qualité de l'air PM2.5 Casablanca</title>
+<title>EDA — Qualité de l'air PM2.5 Delhi</title>
 <style>
   body {{ font-family: 'Segoe UI', Arial, sans-serif; margin: 40px auto; max-width: 1200px; color: #333; }}
   h1 {{ color: #1565c0; border-bottom: 2px solid #1565c0; padding-bottom: 8px; }}
@@ -266,7 +266,7 @@ def generate_html_report(stats: dict, figures: list[Path], data_preview_html: st
 </style>
 </head>
 <body>
-<h1>EDA — Prédiction Qualité de l'air PM2.5 Casablanca</h1>
+<h1>EDA — Prédiction Qualité de l'air PM2.5 Delhi</h1>
 <p>Généré le {pd.Timestamp.now().strftime("%Y-%m-%d %H:%M UTC")}</p>
 
 <h2>1. Statistiques Globales</h2>
@@ -287,7 +287,7 @@ def generate_html_report(stats: dict, figures: list[Path], data_preview_html: st
 <h2>3. Visualisations Analytiques</h2>
 {figures_html}
 
-<footer>PFM — Machine Learning | Master AI & Big Data | Air Quality Casablanca</footer>
+<footer>PFM — Machine Learning | Master AI & Big Data | Air Quality Delhi</footer>
 </body>
 </html>"""
 
@@ -307,7 +307,7 @@ def run_eda(input_path: Path = None) -> None:
     logger.info("║        DÉBUT EDA                             ║")
     logger.info("╚══════════════════════════════════════════════╝")
 
-    input_path = input_path or PROCESSED_DIR / "casablanca_master.parquet"
+    input_path = input_path or PROCESSED_DIR / "delhi_master.parquet"
 
     try:
         logger.info(f"Lecture : {input_path}")

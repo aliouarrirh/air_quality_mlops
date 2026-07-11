@@ -32,7 +32,7 @@ def run_batch_pipeline():
         df_features = create_features(df_clean)
         
         logging.info("--- ÉTAPE 4 : CHARGEMENT ---")
-        save_to_processed(df_features, "../../data/processed/casablanca_master.parquet")
+        save_to_processed(df_features, "../../data/processed/delhi_master.parquet")
         
         logging.info("PIPELINE BATCH TERMINÉ AVEC SUCCÈS !")
 

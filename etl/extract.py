@@ -11,9 +11,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger("ETL_EXTRACT")
 
-LATITUDE = 33.57
-LONGITUDE = -7.59
-TIMEZONE = "Africa/Casablanca"
+LATITUDE = 28.63576
+LONGITUDE = 77.22445
+TIMEZONE = "Asia/Kolkata"
 
 API_URL_AIR_QUALITY = "https://air-quality-api.open-meteo.com/v1/air-quality"
 API_URL_WEATHER = "https://api.open-meteo.com/v1/forecast"

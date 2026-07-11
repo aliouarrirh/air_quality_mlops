@@ -11,7 +11,7 @@ logger = logging.getLogger("ETL_LOAD")
 
 DB_USER   = os.getenv("DB_USER")
 DB_PASS   = os.getenv("DB_PASS")
-DB_NAME   = os.getenv("DB_NAME", "casablanca_aq")
+DB_NAME   = os.getenv("DB_NAME", "delhi_aq")
 IN_DOCKER = os.path.exists("/opt/airflow/project")
 DB_HOST   = "postgres" if IN_DOCKER else os.getenv("DB_HOST", "localhost")
 DB_PORT   = "5432"     if IN_DOCKER else os.getenv("DB_PORT", "5433")

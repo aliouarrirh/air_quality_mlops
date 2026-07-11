@@ -43,9 +43,9 @@ def create_sequences(data, target_col_idx, window_size):
 def train_model():
     logging.info("🧠 Démarrage de l'entraînement Deep Learning (LSTM)...")
 
-    setup_mlflow("PM25_Casablanca")
+    setup_mlflow("PM25_Delhi")
 
-    data_path = os.path.join(project_root, "data", "processed", "casablanca_master.parquet")
+    data_path = os.path.join(project_root, "data", "processed", "delhi_master.parquet")
     df = pd.read_parquet(data_path)
 
     colonnes_a_enlever = [

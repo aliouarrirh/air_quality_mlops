@@ -2,7 +2,7 @@ import requests
 import pandas as pd
 import logging
 
-LAT, LON = 33.57, -7.59
+LAT, LON = 28.63576, 77.22445
 
 def call_open_meteo(url, params):
     try:
@@ -23,11 +23,11 @@ def extract_data(start_date, end_date):
     
     params_aq = {
         "latitude": LAT, "longitude": LON, "start_date": start_date, "end_date": end_date,
-        "hourly": ["pm2_5", "pm10", "nitrogen_dioxide"], "timezone": "Africa/Casablanca"
+        "hourly": ["pm2_5", "pm10", "nitrogen_dioxide"], "timezone": "Asia/Kolkata"
     }
     params_weather = {
         "latitude": LAT, "longitude": LON, "start_date": start_date, "end_date": end_date,
-        "hourly": ["temperature_2m", "wind_speed_10m", "boundary_layer_height"], "timezone": "Africa/Casablanca"
+        "hourly": ["temperature_2m", "wind_speed_10m", "boundary_layer_height"], "timezone": "Asia/Kolkata"
     }
 
     try:

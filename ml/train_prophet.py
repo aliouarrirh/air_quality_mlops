@@ -31,9 +31,9 @@ from mlops.mlflow_config import setup_mlflow
 def train_model():
     logging.info("Démarrage de l'entraînement Prophet (Statistiques Temporelles)...")
 
-    setup_mlflow("PM25_Casablanca")
+    setup_mlflow("PM25_Delhi")
 
-    data_path = os.path.join(project_root, "data", "processed", "casablanca_master.parquet")
+    data_path = os.path.join(project_root, "data", "processed", "delhi_master.parquet")
     df = pd.read_parquet(data_path)
 
     colonnes_a_enlever = [
@@ -57,11 +57,11 @@ def train_model():
 
     with mlflow.start_run(run_name="Prophet_Baseline"):
         
-        logging.info("Création du modèle Prophet avec jours fériés du Maroc")
-        
+        logging.info("Création du modèle Prophet avec jours fériés de l'Inde")
+
         model = Prophet(yearly_seasonality=True, weekly_seasonality=True, daily_seasonality=True)
-        
-        model.add_country_holidays(country_name='MA')
+
+        model.add_country_holidays(country_name='IN')
         
         for col in weather_cols:
             model.add_regressor(col)
