@@ -1,0 +1,13 @@
+id,name,locality,timezone,latitude,longitude,is_monitor,provider,parameters,ingested_at
+1001,Anand Vihar,East Delhi,Asia/Kolkata,28.6469,77.3152,True,CPCB,pm25|pm10|no2|so2|co|o3,2026-07-12T02:00:38.502723+00:00
+1002,ITO,Central Delhi,Asia/Kolkata,28.6289,77.2474,True,CPCB,pm25|pm10|no2|so2|co|o3,2026-07-12T02:00:38.502723+00:00
+1003,Punjabi Bagh,West Delhi,Asia/Kolkata,28.6742,77.1311,True,CPCB,pm25|pm10|no2|so2|co|o3,2026-07-12T02:00:38.502723+00:00
+1004,R.K. Puram,South Delhi,Asia/Kolkata,28.563,77.188,True,CPCB,pm25|pm10|no2|so2|co|o3,2026-07-12T02:00:38.504305+00:00
+1005,Mandir Marg,Central Delhi,Asia/Kolkata,28.6353,77.201,True,CPCB,pm25|pm10|no2|so2|co|o3,2026-07-12T02:00:38.504305+00:00
+1006,Rohini,North Delhi,Asia/Kolkata,28.7331,77.1134,True,CPCB,pm25|pm10|no2|so2|co|o3,2026-07-12T02:00:38.504305+00:00
+1007,Dwarka,South Delhi,Asia/Kolkata,28.5823,77.05,True,CPCB,pm25|pm10|no2|so2|co|o3,2026-07-12T02:00:38.504305+00:00
+1008,Okhla Phase 2,South Delhi,Asia/Kolkata,28.5354,77.2698,True,CPCB,pm25|pm10|no2|so2|co|o3,2026-07-12T02:00:38.504305+00:00
+1009,Wazirpur,North Delhi,Asia/Kolkata,28.6972,77.1656,True,CPCB,pm25|pm10|no2|so2|co|o3,2026-07-12T02:00:38.504305+00:00
+1010,Chandni Chowk,Old Delhi,Asia/Kolkata,28.6562,77.23,True,CPCB,pm25|pm10|no2|so2|co|o3,2026-07-12T02:00:38.504305+00:00
+1011,Jahangirpuri,North Delhi,Asia/Kolkata,28.7284,77.1726,True,CPCB,pm25|pm10|no2|so2|co|o3,2026-07-12T02:00:38.504305+00:00
+1012,Patparganj,East Delhi,Asia/Kolkata,28.628,77.296,True,CPCB,pm25|pm10|no2|so2|co|o3,2026-07-12T02:00:38.504305+00:00
