@@ -1,8 +1,13 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
+from dotenv import load_dotenv
+import mlflow
 import mlflow.pyfunc
 import pandas as pd
 import os
+
+load_dotenv()
+mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "ml/mlruns"))
 
 app = FastAPI(
     title="Delhi Air Quality ML API",
@@ -62,8 +67,8 @@ def predict(request: PredictRequest):
     except Exception as e:
         raise HTTPException(status_code=503, detail=f"Modèle non disponible : {e}")
 
+    # Ordre des colonnes = ordre d'entraînement (pm25 est la cible, pas une feature)
     features = pd.DataFrame([{
-        "pm25":           request.pm25,
         "pm10":           request.pm10 or 0.0,
         "no2":            request.no2  or 0.0,
         "so2":            request.so2  or 0.0,
@@ -73,8 +78,8 @@ def predict(request: PredictRequest):
         "day_of_week":    request.day_of_week,
         "month":          request.month,
         "season_winter":  int(request.season == "winter"),
-        "season_monsoon": int(request.season == "monsoon"),
         "season_summer":  int(request.season == "summer"),
+        "season_monsoon": int(request.season == "monsoon"),
     }])
 
     aqi = float(model.predict(features)[0])
