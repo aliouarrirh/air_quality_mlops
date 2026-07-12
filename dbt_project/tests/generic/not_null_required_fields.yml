@@ -3,18 +3,27 @@ models:
   - name: stg_delhi_measurements
     columns:
       - name: location_id
-        tests: [not_null]
+        tests:
+          - not_null
       - name: parameter
-        tests: [not_null, accepted_values: {values: [pm25, pm10, no2, so2, co, o3, bc]}]
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [pm25, pm10, no2, so2, co, o3, bc]
       - name: datetime_utc
-        tests: [not_null]
+        tests:
+          - not_null
       - name: is_valid
-        tests: [not_null]
+        tests:
+          - not_null
   - name: mart_delhi_hourly
     columns:
       - name: hour_utc
-        tests: [not_null]
+        tests:
+          - not_null
       - name: season
         tests:
           - accepted_values:
-              values: [winter, summer, monsoon, post_monsoon]
+              arguments:
+                values: [winter, summer, monsoon, post_monsoon]
