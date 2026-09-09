@@ -71,7 +71,7 @@ daily_job = define_asset_job(
 
 
 monitoring_job = define_asset_job(
-    name="monitoring_job_v2",
+    name="monitoring_job",
     selection=["collect_monitoring"],
 )
 
@@ -84,7 +84,7 @@ daily_schedule = ScheduleDefinition(
 )
 
 monitoring_schedule = ScheduleDefinition(
-    job_name="monitoring_job_v2",
+    job=monitoring_job,
     cron_schedule="0 * * * *",
 )
 

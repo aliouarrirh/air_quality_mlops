@@ -64,6 +64,8 @@ services:
     environment:
       MLFLOW_TRACKING_URI: http://mlflow:5000
       DAGSTER_HOME: /tmp/dagster_home
+    volumes:
+      - .:/app
     depends_on:
       - mlflow
     networks:
@@ -79,6 +81,8 @@ services:
     environment:
       MLFLOW_TRACKING_URI: http://mlflow:5000
       DAGSTER_HOME: /tmp/dagster_home
+    volumes:
+      - .:/app
     depends_on:
       - mlflow
     networks:
