@@ -7,6 +7,7 @@ import sys
 from dagster import (
     asset, AssetExecutionContext,
     define_asset_job, ScheduleDefinition, Definitions,
+    AssetSelection,
 )
 
 
@@ -63,12 +64,12 @@ def collect_monitoring(context: AssetExecutionContext):
 
 daily_job = define_asset_job(
     name="delhi_daily_pipeline",
-    selection=["ingest_delhi_data", "run_dbt", "train_model"],
+    selection=AssetSelection.groups("ingestion", "transform", "ml"),
 )
 
 monitoring_job = define_asset_job(
     name="monitoring_job",
-    selection=["collect_monitoring"],
+    selection=AssetSelection.groups("monitoring"),
 )
 
 daily_schedule = ScheduleDefinition(
