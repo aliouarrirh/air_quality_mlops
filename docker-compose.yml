@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: root
       POSTGRES_DB: delhi_aq
     ports:
-      - "5433:5432"
+      - "4901:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -23,7 +23,7 @@ services:
     image: ghcr.io/mlflow/mlflow:v2.13.0
     container_name: aq_mlflow
     ports:
-      - "5000:5000"
+      - "4902:5000"
     command: >
       mlflow server
       --host 0.0.0.0
@@ -42,7 +42,7 @@ services:
     container_name: aq_dagster_webserver
     command: dagster-webserver -h 0.0.0.0 -p 3000 -w dagster_pipeline/workspace.yaml
     ports:
-      - "3000:3000"
+      - "4903:3000"
     env_file: .env
     environment:
       MLFLOW_TRACKING_URI: file:///app/ml/mlruns
@@ -75,7 +75,7 @@ services:
     build: .
     container_name: aq_api
     ports:
-      - "8000:8000"
+      - "4904:8000"
     env_file: .env
     environment:
       MLFLOW_TRACKING_URI: file:///app/ml/mlruns
@@ -90,7 +90,7 @@ services:
     image: grafana/grafana:10.4.2
     container_name: aq_grafana
     ports:
-      - "3001:3000"
+      - "4905:3000"
     environment:
       GF_SECURITY_ADMIN_PASSWORD: admin
       GF_USERS_ALLOW_SIGN_UP: 'false'
