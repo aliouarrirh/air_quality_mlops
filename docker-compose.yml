@@ -107,6 +107,7 @@ volumes:
   postgres_data:
   mlflow_store:
   dagster_home:
+    name: opscrafters_dagster_home
   grafana_data:
 
 networks:
