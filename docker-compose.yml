@@ -27,14 +27,13 @@ services:
       mlflow server
       --host 0.0.0.0
       --port 5000
-      --backend-store-uri file:///mlruns
-      --default-artifact-root file:///mlruns
+      --backend-store-uri sqlite:////mldata/mlflow.db
+      --default-artifact-root file:///mldata/mlruns
     environment:
-      MLFLOW_ALLOW_FILE_STORE: "true"
       MLFLOW_SERVER_ALLOWED_HOSTS: "*"
       MLFLOW_SERVER_CORS_ALLOWED_ORIGINS: "*"
     volumes:
-      - ./ml/mlruns:/mlruns
+      - ./ml:/mldata
     networks:
       - air_quality_net
     restart: unless-stopped
