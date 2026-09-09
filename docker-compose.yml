@@ -30,6 +30,7 @@ services:
       --port 5000
       --backend-store-uri file:///mlruns
       --default-artifact-root file:///mlruns
+      --gunicorn-opts "--forwarded-allow-ips=*"
     environment:
       MLFLOW_ALLOW_FILE_STORE: "true"
     volumes:
