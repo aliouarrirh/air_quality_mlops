@@ -64,12 +64,12 @@ def collect_monitoring(context: AssetExecutionContext):
 
 daily_job = define_asset_job(
     name="delhi_daily_pipeline",
-    selection=AssetSelection.groups("ingestion", "transform", "ml"),
+    selection=AssetSelection.assets(ingest_delhi_data, run_dbt, train_model),
 )
 
 monitoring_job = define_asset_job(
     name="monitoring_job",
-    selection=AssetSelection.groups("monitoring"),
+    selection=AssetSelection.assets(collect_monitoring),
 )
 
 daily_schedule = ScheduleDefinition(
