@@ -20,7 +20,7 @@ services:
       - air_quality_net
 
   mlflow:
-    image: ghcr.io/mlflow/mlflow:v2.13.0
+    image: ghcr.io/mlflow/mlflow:latest
     container_name: aq_mlflow
     ports:
       - "4902:5000"

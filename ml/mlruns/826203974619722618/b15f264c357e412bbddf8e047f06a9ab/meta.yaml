@@ -1,4 +1,4 @@
-artifact_uri: file:///C:/Users/hp/Casablanca_AirQuality/ml/mlruns/826203974619722618/b15f264c357e412bbddf8e047f06a9ab/artifacts
+artifact_uri: file:///mlruns/826203974619722618/b15f264c357e412bbddf8e047f06a9ab/artifacts
 end_time: 1783822350491
 entry_point_name: ''
 experiment_id: '826203974619722618'

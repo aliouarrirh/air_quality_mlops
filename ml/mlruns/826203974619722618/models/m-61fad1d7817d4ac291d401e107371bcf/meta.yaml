@@ -1,4 +1,4 @@
-artifact_location: file:///C:/Users/hp/Casablanca_AirQuality/ml/mlruns/826203974619722618/models/m-61fad1d7817d4ac291d401e107371bcf/artifacts
+artifact_location: file:///mlruns/826203974619722618/models/m-61fad1d7817d4ac291d401e107371bcf/artifacts
 creation_timestamp: 1783822329058
 experiment_id: '826203974619722618'
 last_updated_timestamp: 1783822350310
