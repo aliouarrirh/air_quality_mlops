@@ -28,11 +28,10 @@ services:
       mlflow server
       --host 0.0.0.0
       --port 5000
-      --backend-store-uri sqlite:////mlflow/store.db
-      --default-artifact-root /mlflow/artifacts
+      --backend-store-uri file:///mlruns
+      --default-artifact-root file:///mlruns
     volumes:
-      - mlflow_store:/mlflow
-      - ./ml/mlruns:/mlflow/artifacts
+      - ./ml/mlruns:/mlruns
     networks:
       - air_quality_net
     restart: unless-stopped
@@ -46,7 +45,7 @@ services:
       - "4903:3000"
     env_file: .env
     environment:
-      MLFLOW_TRACKING_URI: file:///app/ml/mlruns
+      MLFLOW_TRACKING_URI: http://mlflow:5000
       DAGSTER_HOME: /tmp/dagster_home
     depends_on:
       - mlflow
@@ -61,7 +60,7 @@ services:
       sh -c "mkdir -p /tmp/dagster_home && dagster-daemon run -w dagster_pipeline/workspace.yaml"
     env_file: .env
     environment:
-      MLFLOW_TRACKING_URI: file:///app/ml/mlruns
+      MLFLOW_TRACKING_URI: http://mlflow:5000
       DAGSTER_HOME: /tmp/dagster_home
     depends_on:
       - mlflow
@@ -76,7 +75,7 @@ services:
       - "4904:8000"
     env_file: .env
     environment:
-      MLFLOW_TRACKING_URI: file:///app/ml/mlruns
+      MLFLOW_TRACKING_URI: http://mlflow:5000
       MLFLOW_MODEL_URI: models:/m-61fad1d7817d4ac291d401e107371bcf
     depends_on:
       - mlflow
@@ -103,7 +102,6 @@ services:
 
 volumes:
   postgres_data:
-  mlflow_store:
   grafana_data:
 
 networks:
