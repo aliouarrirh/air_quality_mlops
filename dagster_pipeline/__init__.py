@@ -1,12 +1,13 @@
 """
 Dagster pipeline — Delhi Air Quality
-Orchestration : dlt → dbt → ML → MLflow
+Orchestration : dlt → dbt → ML → MLflow + monitoring
 """
 import subprocess
 import sys
 from dagster import (
     asset, AssetExecutionContext,
     define_asset_job, ScheduleDefinition, Definitions,
+    op, job, schedule,
 )
 
 
@@ -49,6 +50,27 @@ def train_model(context: AssetExecutionContext):
     return {"status": "ok"}
 
 
+@op
+def collect_monitoring_op(context):
+    result = subprocess.run(
+        [sys.executable, "pipeline/monitoring.py"],
+        capture_output=True, text=True,
+    )
+    context.log.info(result.stdout)
+    if result.returncode != 0:
+        context.log.warning(f"Monitoring error (non-bloquant): {result.stderr}")
+
+
+@job(name="monitoring_job", description="Collecte disponibilité, latence, métriques ML, dérive → PostgreSQL")
+def monitoring_job():
+    collect_monitoring_op()
+
+
+@schedule(job=monitoring_job, cron_schedule="0 * * * *", name="monitoring_hourly")
+def monitoring_schedule(_context):
+    return {}
+
+
 daily_job = define_asset_job(
     name="delhi_daily_pipeline",
     selection=["ingest_delhi_data", "run_dbt", "train_model"],
@@ -61,6 +83,6 @@ daily_schedule = ScheduleDefinition(
 
 defs = Definitions(
     assets=[ingest_delhi_data, run_dbt, train_model],
-    jobs=[daily_job],
-    schedules=[daily_schedule],
+    jobs=[daily_job, monitoring_job],
+    schedules=[daily_schedule, monitoring_schedule],
 )

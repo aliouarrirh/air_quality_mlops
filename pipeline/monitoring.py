@@ -51,18 +51,20 @@ def collect_service_health(cur):
 
 
 def collect_ml_metrics(cur):
-    import duckdb, mlflow
-    MLFLOW_URI = os.getenv("MLFLOW_TRACKING_URI", "http://mlflow:5000")
-    mlflow.set_tracking_uri(MLFLOW_URI)
+    import mlflow
+    mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "http://mlflow:5000"))
     try:
         client = mlflow.MlflowClient()
+        experiments = client.search_experiments()
+        if not experiments:
+            return
+        exp_ids = [e.experiment_id for e in experiments]
         runs = client.search_runs(
-            experiment_ids=[], order_by=["start_time DESC"], max_results=1
+            experiment_ids=exp_ids, order_by=["start_time DESC"], max_results=1
         )
         if not runs:
             return
-        run = runs[0]
-        for k, v in run.data.metrics.items():
+        for k, v in runs[0].data.metrics.items():
             cur.execute(
                 "INSERT INTO ml_metrics (model_name, metric_name, metric_value) VALUES (%s,%s,%s)",
                 ("DelhiAirQualityModel", k, v),
