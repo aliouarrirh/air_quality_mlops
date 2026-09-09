@@ -6,188 +6,138 @@
   "refresh": "1m",
   "schemaVersion": 38,
   "time": { "from": "now-72h", "to": "now" },
-  "timepicker": {},
   "tags": ["delhi", "air-quality", "mlops"],
   "panels": [
+
+    { "id": 100, "type": "text", "title": "── 1. Disponibilité du service ──────────────────────────────────────────",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "options": { "content": "", "mode": "markdown" } },
+
     {
-      "id": 1,
-      "title": "PM2.5 Actuel (observé)",
-      "type": "stat",
-      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "id": 1, "title": "Uptime /health (72h)", "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 1 },
       "datasource": { "type": "postgres", "uid": "delhi-postgres" },
-      "targets": [{
-        "rawSql": "SELECT pm25_observe AS \"PM2.5 µg/m³\" FROM predictions ORDER BY datetime DESC LIMIT 1",
-        "format": "table",
-        "refId": "A"
-      }],
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none", "textMode": "value" },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "µg/m³",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 100 },
-              { "color": "orange", "value": 200 },
-              { "color": "red", "value": 300 }
-            ]
-          },
-          "color": { "mode": "thresholds" }
-        }
-      }
+      "targets": [{ "rawSql": "SELECT ROUND(100.0 * SUM(CASE WHEN is_available THEN 1 ELSE 0 END) / COUNT(*), 2) AS \"Uptime %\" FROM service_health WHERE endpoint='/health' AND datetime >= NOW() - INTERVAL '72 hours'", "format": "table", "refId": "A" }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "textMode": "value_and_name" },
+      "fieldConfig": { "defaults": { "unit": "percent", "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 90 }, { "color": "green", "value": 99 }] }, "color": { "mode": "thresholds" } } }
     },
     {
-      "id": 2,
-      "title": "PM2.5 Prédit (XGBoost)",
-      "type": "stat",
-      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "id": 2, "title": "Uptime /predict (72h)", "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 1 },
       "datasource": { "type": "postgres", "uid": "delhi-postgres" },
-      "targets": [{
-        "rawSql": "SELECT pm25_predit AS \"XGBoost µg/m³\" FROM predictions ORDER BY datetime DESC LIMIT 1",
-        "format": "table",
-        "refId": "A"
-      }],
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none", "textMode": "value" },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "µg/m³",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 100 },
-              { "color": "orange", "value": 200 },
-              { "color": "red", "value": 300 }
-            ]
-          },
-          "color": { "mode": "thresholds" }
-        }
-      }
+      "targets": [{ "rawSql": "SELECT ROUND(100.0 * SUM(CASE WHEN is_available THEN 1 ELSE 0 END) / COUNT(*), 2) AS \"Uptime %\" FROM service_health WHERE endpoint='/predict' AND datetime >= NOW() - INTERVAL '72 hours'", "format": "table", "refId": "A" }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "textMode": "value_and_name" },
+      "fieldConfig": { "defaults": { "unit": "percent", "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 90 }, { "color": "green", "value": 99 }] }, "color": { "mode": "thresholds" } } }
     },
     {
-      "id": 3,
-      "title": "Catégorie NAQI actuelle",
-      "type": "stat",
-      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "id": 3, "title": "Disponibilité par endpoint (72h)", "type": "timeseries",
+      "gridPos": { "h": 4, "w": 16, "x": 8, "y": 1 },
       "datasource": { "type": "postgres", "uid": "delhi-postgres" },
-      "targets": [{
-        "rawSql": "SELECT aqi_category AS \"Catégorie\" FROM predictions ORDER BY datetime DESC LIMIT 1",
-        "format": "table",
-        "refId": "A"
-      }],
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "value" },
-      "fieldConfig": { "defaults": { "mappings": [
-        { "type": "value", "options": { "Good": { "color": "green" }, "Satisfactory": { "color": "light-green" }, "Moderate": { "color": "yellow" }, "Poor": { "color": "orange" }, "Very Poor": { "color": "red" }, "Severe": { "color": "dark-red" } } }
-      ] } }
+      "targets": [{ "rawSql": "SELECT datetime AS time, CASE WHEN is_available THEN 1 ELSE 0 END AS \"/health\", NULL AS \"/predict\" FROM service_health WHERE endpoint='/health' AND datetime >= NOW() - INTERVAL '72 hours' UNION ALL SELECT datetime AS time, NULL, CASE WHEN is_available THEN 1 ELSE 0 END FROM service_health WHERE endpoint='/predict' AND datetime >= NOW() - INTERVAL '72 hours' ORDER BY time", "format": "time_series", "refId": "A" }],
+      "fieldConfig": { "defaults": { "custom": { "lineWidth": 1, "fillOpacity": 20 }, "min": 0, "max": 1.1 } },
+      "options": { "tooltip": { "mode": "multi" }, "legend": { "displayMode": "list", "placement": "bottom" } }
+    },
+
+    { "id": 101, "type": "text", "title": "── 2. Temps de réponse ──────────────────────────────────────────────────",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 },
+      "options": { "content": "", "mode": "markdown" } },
+
+    {
+      "id": 4, "title": "Latence p50 /health", "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 6 },
+      "datasource": { "type": "postgres", "uid": "delhi-postgres" },
+      "targets": [{ "rawSql": "SELECT ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY response_ms)::numeric, 1) AS \"p50 ms\" FROM service_health WHERE endpoint='/health' AND datetime >= NOW() - INTERVAL '72 hours'", "format": "table", "refId": "A" }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "textMode": "value_and_name" },
+      "fieldConfig": { "defaults": { "unit": "ms", "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 200 }, { "color": "red", "value": 500 }] }, "color": { "mode": "thresholds" } } }
     },
     {
-      "id": 4,
-      "title": "Dépassements NAQI (72h)",
-      "type": "stat",
-      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "id": 5, "title": "Latence p50 /predict", "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 6 },
       "datasource": { "type": "postgres", "uid": "delhi-postgres" },
-      "targets": [{
-        "rawSql": "SELECT COUNT(*) AS \"Dépassements\" FROM predictions WHERE depasse_naqi = true AND datetime >= NOW() - INTERVAL '72 hours'",
-        "format": "table",
-        "refId": "A"
-      }],
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none", "textMode": "value" },
-      "fieldConfig": { "defaults": { "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "orange", "value": 5 }, { "color": "red", "value": 15 }] }, "color": { "mode": "thresholds" } } }
+      "targets": [{ "rawSql": "SELECT ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY response_ms)::numeric, 1) AS \"p50 ms\" FROM service_health WHERE endpoint='/predict' AND datetime >= NOW() - INTERVAL '72 hours'", "format": "table", "refId": "A" }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "textMode": "value_and_name" },
+      "fieldConfig": { "defaults": { "unit": "ms", "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 300 }, { "color": "red", "value": 800 }] }, "color": { "mode": "thresholds" } } }
     },
     {
-      "id": 5,
-      "title": "PM2.5 — Observé vs XGBoost (72h)",
-      "type": "timeseries",
-      "gridPos": { "h": 9, "w": 16, "x": 0, "y": 4 },
+      "id": 6, "title": "Temps de réponse (ms) — 72h", "type": "timeseries",
+      "gridPos": { "h": 4, "w": 16, "x": 8, "y": 6 },
       "datasource": { "type": "postgres", "uid": "delhi-postgres" },
-      "targets": [{
-        "rawSql": "SELECT datetime AS time, pm25_observe AS \"PM2.5 Observé\", pm25_predit AS \"XGBoost\" FROM predictions WHERE datetime >= NOW() - INTERVAL '72 hours' ORDER BY datetime ASC",
-        "format": "time_series",
-        "refId": "A"
-      }],
-      "fieldConfig": {
-        "defaults": { "unit": "µg/m³", "custom": { "lineWidth": 2, "fillOpacity": 10 } },
-        "overrides": [
-          { "matcher": { "id": "byName", "options": "PM2.5 Observé" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "blue" } }] },
-          { "matcher": { "id": "byName", "options": "XGBoost" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } }, { "id": "custom.lineStyle", "value": { "dash": [10, 5], "fill": "dash" } }] }
-        ]
-      },
+      "targets": [{ "rawSql": "SELECT datetime AS time, CASE WHEN endpoint='/health' THEN response_ms END AS \"/health\", CASE WHEN endpoint='/predict' THEN response_ms END AS \"/predict\" FROM service_health WHERE datetime >= NOW() - INTERVAL '72 hours' ORDER BY time", "format": "time_series", "refId": "A" }],
+      "fieldConfig": { "defaults": { "unit": "ms", "custom": { "lineWidth": 1, "fillOpacity": 10 } } },
+      "options": { "tooltip": { "mode": "multi" }, "legend": { "displayMode": "list", "placement": "bottom" } }
+    },
+
+    { "id": 102, "type": "text", "title": "── 3. Métriques ML ──────────────────────────────────────────────────────",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 10 },
+      "options": { "content": "", "mode": "markdown" } },
+
+    {
+      "id": 7, "title": "RMSE (µg/m³)", "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 11 },
+      "datasource": { "type": "postgres", "uid": "delhi-postgres" },
+      "targets": [{ "rawSql": "SELECT ROUND(metric_value::numeric, 2) AS \"RMSE\" FROM ml_metrics WHERE metric_name='rmse' ORDER BY datetime DESC LIMIT 1", "format": "table", "refId": "A" }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "textMode": "value_and_name" },
+      "fieldConfig": { "defaults": { "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 40 }, { "color": "red", "value": 60 }] }, "color": { "mode": "thresholds" } } }
+    },
+    {
+      "id": 8, "title": "MAE (µg/m³)", "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 11 },
+      "datasource": { "type": "postgres", "uid": "delhi-postgres" },
+      "targets": [{ "rawSql": "SELECT ROUND(metric_value::numeric, 2) AS \"MAE\" FROM ml_metrics WHERE metric_name='mae' ORDER BY datetime DESC LIMIT 1", "format": "table", "refId": "A" }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "textMode": "value_and_name" },
+      "fieldConfig": { "defaults": { "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 30 }, { "color": "red", "value": 45 }] }, "color": { "mode": "thresholds" } } }
+    },
+    {
+      "id": 9, "title": "R² Score", "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 11 },
+      "datasource": { "type": "postgres", "uid": "delhi-postgres" },
+      "targets": [{ "rawSql": "SELECT ROUND(metric_value::numeric, 3) AS \"R²\" FROM ml_metrics WHERE metric_name='r2' ORDER BY datetime DESC LIMIT 1", "format": "table", "refId": "A" }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "textMode": "value_and_name" },
+      "fieldConfig": { "defaults": { "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 0.1 }, { "color": "green", "value": 0.3 }] }, "color": { "mode": "thresholds" } } }
+    },
+    {
+      "id": 10, "title": "Évolution RMSE / MAE (72h)", "type": "timeseries",
+      "gridPos": { "h": 4, "w": 12, "x": 12, "y": 11 },
+      "datasource": { "type": "postgres", "uid": "delhi-postgres" },
+      "targets": [{ "rawSql": "SELECT datetime AS time, CASE WHEN metric_name='rmse' THEN metric_value END AS \"RMSE\", CASE WHEN metric_name='mae' THEN metric_value END AS \"MAE\" FROM ml_metrics WHERE datetime >= NOW() - INTERVAL '72 hours' ORDER BY time", "format": "time_series", "refId": "A" }],
+      "fieldConfig": { "defaults": { "unit": "µg/m³", "custom": { "lineWidth": 2 } } },
+      "options": { "tooltip": { "mode": "multi" }, "legend": { "displayMode": "list", "placement": "bottom" } }
+    },
+
+    { "id": 103, "type": "text", "title": "── 4. Dérive simple ─────────────────────────────────────────────────────",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 15 },
+      "options": { "content": "", "mode": "markdown" } },
+
+    {
+      "id": 11, "title": "Features en dérive actuellement", "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 16 },
+      "datasource": { "type": "postgres", "uid": "delhi-postgres" },
+      "targets": [{ "rawSql": "SELECT COUNT(DISTINCT feature) AS \"Features en dérive\" FROM drift_metrics WHERE is_drift = true AND datetime >= NOW() - INTERVAL '6 hours'", "format": "table", "refId": "A" }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "textMode": "value_and_name" },
+      "fieldConfig": { "defaults": { "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "orange", "value": 1 }, { "color": "red", "value": 2 }] }, "color": { "mode": "thresholds" } } }
+    },
+    {
+      "id": 12, "title": "Drift Score par feature (dernier check)", "type": "bargauge",
+      "gridPos": { "h": 4, "w": 8, "x": 4, "y": 16 },
+      "datasource": { "type": "postgres", "uid": "delhi-postgres" },
+      "targets": [{ "rawSql": "SELECT feature AS \"Feature\", drift_score AS \"Score\" FROM drift_metrics WHERE datetime = (SELECT MAX(datetime) FROM drift_metrics) ORDER BY drift_score DESC", "format": "table", "refId": "A" }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "orientation": "horizontal", "displayMode": "gradient", "valueMode": "color" },
+      "fieldConfig": { "defaults": { "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 1 }, { "color": "red", "value": 2 }] }, "color": { "mode": "thresholds" }, "min": 0, "max": 5 } }
+    },
+    {
+      "id": 13, "title": "Évolution drift PM2.5 (72h)", "type": "timeseries",
+      "gridPos": { "h": 4, "w": 12, "x": 12, "y": 16 },
+      "datasource": { "type": "postgres", "uid": "delhi-postgres" },
+      "targets": [{ "rawSql": "SELECT datetime AS time, current_mean AS \"Moyenne actuelle\", baseline_mean AS \"Baseline\" FROM drift_metrics WHERE feature='pm25' AND datetime >= NOW() - INTERVAL '72 hours' ORDER BY time", "format": "time_series", "refId": "A" }],
+      "fieldConfig": { "defaults": { "unit": "µg/m³", "custom": { "lineWidth": 2 } }, "overrides": [{ "matcher": { "id": "byName", "options": "Baseline" }, "properties": [{ "id": "custom.lineStyle", "value": { "dash": [10, 5], "fill": "dash" } }, { "id": "color", "value": { "mode": "fixed", "fixedColor": "gray" } }] }] },
       "options": { "tooltip": { "mode": "multi" }, "legend": { "displayMode": "list", "placement": "bottom" } }
     },
     {
-      "id": 6,
-      "title": "Niveau PM2.5 actuel",
-      "type": "gauge",
-      "gridPos": { "h": 9, "w": 8, "x": 16, "y": 4 },
+      "id": 14, "title": "Tableau de dérive — toutes features", "type": "table",
+      "gridPos": { "h": 5, "w": 24, "x": 0, "y": 20 },
       "datasource": { "type": "postgres", "uid": "delhi-postgres" },
-      "targets": [{
-        "rawSql": "SELECT pm25_observe AS \"PM2.5\" FROM predictions ORDER BY datetime DESC LIMIT 1",
-        "format": "table",
-        "refId": "A"
-      }],
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "minVizHeight": 75, "minVizWidth": 75, "orientation": "auto", "showThresholdLabels": true, "showThresholdMarkers": true },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "µg/m³",
-          "min": 0, "max": 500,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "green", "value": null },
-              { "color": "light-green", "value": 50 },
-              { "color": "yellow", "value": 100 },
-              { "color": "orange", "value": 200 },
-              { "color": "red", "value": 300 },
-              { "color": "dark-red", "value": 400 }
-            ]
-          }
-        }
-      }
-    },
-    {
-      "id": 7,
-      "title": "Erreur Absolue XGBoost (72h)",
-      "type": "barchart",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 13 },
-      "datasource": { "type": "postgres", "uid": "delhi-postgres" },
-      "targets": [{
-        "rawSql": "SELECT datetime AS time, ABS(pm25_observe - pm25_predit) AS \"Erreur XGBoost\" FROM predictions WHERE datetime >= NOW() - INTERVAL '72 hours' ORDER BY datetime ASC",
-        "format": "time_series",
-        "refId": "A"
-      }],
-      "fieldConfig": { "defaults": { "unit": "µg/m³", "color": { "mode": "fixed", "fixedColor": "orange" } } },
-      "options": { "legend": { "displayMode": "list", "placement": "bottom" } }
-    },
-    {
-      "id": 8,
-      "title": "Historique des prédictions",
-      "type": "table",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 13 },
-      "datasource": { "type": "postgres", "uid": "delhi-postgres" },
-      "targets": [{
-        "rawSql": "SELECT datetime AS \"Heure\", pm25_observe AS \"Observé\", pm25_predit AS \"XGBoost\", aqi_category AS \"Catégorie NAQI\", CASE WHEN depasse_naqi THEN '⚠ Oui' ELSE 'Non' END AS \"Dépasse NAQI\" FROM predictions ORDER BY datetime DESC LIMIT 24",
-        "format": "table",
-        "refId": "A"
-      }],
-      "options": { "sortBy": [] },
-      "fieldConfig": { "defaults": { "custom": { "align": "auto" } } }
-    },
-    {
-      "id": 9,
-      "title": "Journal du Pipeline",
-      "type": "table",
-      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 21 },
-      "datasource": { "type": "postgres", "uid": "delhi-postgres" },
-      "targets": [{
-        "rawSql": "SELECT run_at AS \"Exécuté le\", statut AS \"Statut\", nouvelles_lignes AS \"Lignes ingérées\", pm25_actuel AS \"PM2.5 actuel\", message AS \"Message\" FROM pipeline_runs ORDER BY run_at DESC LIMIT 10",
-        "format": "table",
-        "refId": "A"
-      }],
-      "fieldConfig": {
-        "defaults": { "custom": { "align": "auto" } },
-        "overrides": [{ "matcher": { "id": "byName", "options": "Statut" }, "properties": [{ "id": "custom.displayMode", "value": "color-background" }, { "id": "mappings", "value": [{ "type": "value", "options": { "OK": { "color": "green", "index": 0 }, "WARN": { "color": "orange", "index": 1 }, "ERROR": { "color": "red", "index": 2 } } }] }] }]
-      }
+      "targets": [{ "rawSql": "SELECT datetime AS \"Horodatage\", feature AS \"Feature\", ROUND(current_mean::numeric,2) AS \"Moy. actuelle\", ROUND(baseline_mean::numeric,2) AS \"Baseline\", ROUND(drift_score::numeric,3) AS \"Score dérive\", CASE WHEN is_drift THEN '⚠ DÉRIVE' ELSE 'OK' END AS \"Statut\" FROM drift_metrics WHERE datetime >= NOW() - INTERVAL '72 hours' ORDER BY datetime DESC, feature LIMIT 30", "format": "table", "refId": "A" }],
+      "fieldConfig": { "overrides": [{ "matcher": { "id": "byName", "options": "Statut" }, "properties": [{ "id": "custom.displayMode", "value": "color-background" }, { "id": "mappings", "value": [{ "type": "value", "options": { "OK": { "color": "green", "index": 0 }, "⚠ DÉRIVE": { "color": "red", "index": 1 } } }] }] }] }
     }
   ]
 }
