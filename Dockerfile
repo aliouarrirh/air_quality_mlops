@@ -3,19 +3,21 @@ FROM python:3.11-slim
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential curl && \
+    build-essential curl git && \
     rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir \
     fastapi uvicorn[standard] pydantic \
     mlflow scikit-learn xgboost lightgbm \
-    duckdb numpy pandas python-dotenv joblib
+    duckdb numpy pandas python-dotenv joblib \
+    dagster dagster-webserver dagster-pipes \
+    dlt[duckdb] dbt-duckdb
 
-COPY api/ ./api/
-COPY ml/  ./ml/
+# Copie tout le projet
+COPY . .
 
-EXPOSE 8000
+EXPOSE 8000 3000
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:8000/health || exit 1

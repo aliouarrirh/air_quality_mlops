@@ -28,13 +28,11 @@ services:
       mlflow server
       --host 0.0.0.0
       --port 5000
-      --backend-store-uri postgresql://postgres:root@postgres/delhi_aq
+      --backend-store-uri sqlite:////mlflow/store.db
       --default-artifact-root /mlflow/artifacts
     volumes:
-      - mlflow_artifacts:/mlflow/artifacts
-    depends_on:
-      postgres:
-        condition: service_healthy
+      - mlflow_store:/mlflow
+      - ./ml/mlruns:/mlflow/artifacts
     networks:
       - air_quality_net
     restart: unless-stopped
@@ -47,12 +45,10 @@ services:
       - "3000:3000"
     env_file: .env
     environment:
-      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MLFLOW_TRACKING_URI: file:///app/ml/mlruns
     volumes:
-      - .:/app
       - dagster_home:/root/.dagster
     depends_on:
-      - postgres
       - mlflow
     networks:
       - air_quality_net
@@ -64,12 +60,10 @@ services:
     command: dagster-daemon run -w dagster_pipeline/workspace.yaml
     env_file: .env
     environment:
-      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MLFLOW_TRACKING_URI: file:///app/ml/mlruns
     volumes:
-      - .:/app
       - dagster_home:/root/.dagster
     depends_on:
-      - postgres
       - mlflow
     networks:
       - air_quality_net
@@ -82,8 +76,8 @@ services:
       - "8000:8000"
     env_file: .env
     environment:
-      MLFLOW_TRACKING_URI: http://mlflow:5000
-      MLFLOW_MODEL_URI: models:/DelhiAirQualityModel/Production
+      MLFLOW_TRACKING_URI: file:///app/ml/mlruns
+      MLFLOW_MODEL_URI: models:/m-61fad1d7817d4ac291d401e107371bcf
     depends_on:
       - mlflow
     networks:
@@ -109,7 +103,7 @@ services:
 
 volumes:
   postgres_data:
-  mlflow_artifacts:
+  mlflow_store:
   dagster_home:
   grafana_data:
 

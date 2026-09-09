@@ -1,0 +1,10 @@
+artifact_location: file:///C:/Users/hp/Casablanca_AirQuality/ml/mlruns/826203974619722618/models/m-61fad1d7817d4ac291d401e107371bcf/artifacts
+creation_timestamp: 1783822329058
+experiment_id: '826203974619722618'
+last_updated_timestamp: 1783822350310
+model_id: m-61fad1d7817d4ac291d401e107371bcf
+model_type: null
+name: model
+source_run_id: b15f264c357e412bbddf8e047f06a9ab
+status: 2
+status_message: null

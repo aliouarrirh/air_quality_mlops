@@ -1,0 +1,16 @@
+creation_timestamp: 1783822350386
+current_stage: None
+deployment_job_state: null
+description: null
+last_updated_timestamp: 1783822350386
+model_id: m-61fad1d7817d4ac291d401e107371bcf
+name: DelhiAirQualityModel
+run_id: b15f264c357e412bbddf8e047f06a9ab
+run_link: null
+source: models:/m-61fad1d7817d4ac291d401e107371bcf
+status: READY
+status_message: null
+storage_location: file:///C:/Users/hp/Casablanca_AirQuality/ml/mlruns/826203974619722618/models/m-61fad1d7817d4ac291d401e107371bcf/artifacts
+user_id: null
+version: 1
+workspace: default

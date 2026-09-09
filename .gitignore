@@ -1,5 +1,10 @@
 __pycache__/
 logs/
 .venv/
+venv/
 .env
 data/*.duckdb
+api_stdout.log
+api_stderr.log
+dbt_project/.user.yml
+dbt_project/target/

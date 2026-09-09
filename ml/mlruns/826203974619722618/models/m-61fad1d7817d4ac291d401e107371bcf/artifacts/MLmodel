@@ -1,0 +1,22 @@
+artifact_path: file:///C:/Users/hp/Casablanca_AirQuality/ml/mlruns/826203974619722618/models/m-61fad1d7817d4ac291d401e107371bcf/artifacts
+flavors:
+  python_function:
+    data: model.ubj
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.xgboost
+    python_version: 3.10.0
+  xgboost:
+    code: null
+    data: model.ubj
+    model_class: xgboost.sklearn.XGBRegressor
+    model_format: ubj
+    xgb_version: 3.2.0
+mlflow_version: 3.11.1
+model_id: m-61fad1d7817d4ac291d401e107371bcf
+model_size_bytes: 825609
+model_uuid: m-61fad1d7817d4ac291d401e107371bcf
+prompts: null
+run_id: b15f264c357e412bbddf8e047f06a9ab
+utc_time_created: '2026-07-12 02:12:09.141259'

@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/Users/hp/Casablanca_AirQuality/ml/mlruns/826203974619722618/b15f264c357e412bbddf8e047f06a9ab/artifacts
+end_time: 1783822350491
+entry_point_name: ''
+experiment_id: '826203974619722618'
+lifecycle_stage: active
+run_id: b15f264c357e412bbddf8e047f06a9ab
+run_name: XGBoost_Delhi_v1
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1783822328461
+status: 3
+tags: []
+user_id: hp
