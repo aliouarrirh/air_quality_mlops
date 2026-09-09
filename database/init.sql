@@ -94,7 +94,7 @@ SELECT
     f.feature,
     ROUND((f.base_mean + f.variation * SIN(n * 0.5) + f.noise * RANDOM())::numeric, 2),
     f.base_mean,
-    ROUND(ABS(f.variation * SIN(n * 0.5) + f.noise * RANDOM()) / f.baseline_std, 3),
+    ROUND((ABS(f.variation * SIN(n * 0.5) + f.noise * RANDOM()) / f.baseline_std)::numeric, 3),
     ABS(f.variation * SIN(n * 0.5)) / f.baseline_std > 2
 FROM generate_series(0, 11) AS n
 CROSS JOIN (VALUES
