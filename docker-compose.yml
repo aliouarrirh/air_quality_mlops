@@ -32,6 +32,7 @@ services:
     environment:
       MLFLOW_ALLOW_FILE_STORE: "true"
       MLFLOW_SERVER_ALLOWED_HOSTS: "*"
+      MLFLOW_SERVER_CORS_ALLOWED_ORIGINS: "*"
     volumes:
       - ./ml/mlruns:/mlruns
     networks:
