@@ -7,7 +7,6 @@ import sys
 from dagster import (
     asset, AssetExecutionContext,
     define_asset_job, ScheduleDefinition, Definitions,
-    op, job, schedule,
 )
 
 
@@ -50,25 +49,16 @@ def train_model(context: AssetExecutionContext):
     return {"status": "ok"}
 
 
-@op
-def collect_monitoring_op(context):
+@asset(group_name="monitoring", description="Collecte disponibilité, latence, métriques ML, dérive → PostgreSQL")
+def collect_monitoring(context: AssetExecutionContext):
     result = subprocess.run(
         [sys.executable, "pipeline/monitoring.py"],
         capture_output=True, text=True,
     )
     context.log.info(result.stdout)
     if result.returncode != 0:
-        context.log.warning(f"Monitoring error (non-bloquant): {result.stderr}")
-
-
-@job(name="monitoring_job", description="Collecte disponibilité, latence, métriques ML, dérive → PostgreSQL")
-def monitoring_job():
-    collect_monitoring_op()
-
-
-@schedule(job=monitoring_job, cron_schedule="0 * * * *", name="monitoring_hourly")
-def monitoring_schedule(_context):
-    return {}
+        context.log.warning(f"Monitoring warning: {result.stderr}")
+    return {"status": "ok"}
 
 
 daily_job = define_asset_job(
@@ -76,13 +66,23 @@ daily_job = define_asset_job(
     selection=["ingest_delhi_data", "run_dbt", "train_model"],
 )
 
+monitoring_job = define_asset_job(
+    name="monitoring_job",
+    selection=["collect_monitoring"],
+)
+
 daily_schedule = ScheduleDefinition(
     job=daily_job,
-    cron_schedule="0 1 * * *",  # 1h IST (minuit UTC → 5h30 IST)
+    cron_schedule="0 1 * * *",
+)
+
+monitoring_schedule = ScheduleDefinition(
+    job=monitoring_job,
+    cron_schedule="0 * * * *",  # toutes les heures
 )
 
 defs = Definitions(
-    assets=[ingest_delhi_data, run_dbt, train_model],
+    assets=[ingest_delhi_data, run_dbt, train_model, collect_monitoring],
     jobs=[daily_job, monitoring_job],
     schedules=[daily_schedule, monitoring_schedule],
 )
