@@ -8,7 +8,6 @@ from dagster import (
     asset, AssetExecutionContext,
     define_asset_job, ScheduleDefinition, Definitions,
     AssetSelection,
-    job, op,
 )
 
 
@@ -71,20 +70,10 @@ daily_job = define_asset_job(
 )
 
 
-@op(name="run_monitoring_op")
-def run_monitoring_op(context):
-    result = subprocess.run(
-        [sys.executable, "pipeline/monitoring.py"],
-        capture_output=True, text=True,
-    )
-    context.log.info(result.stdout)
-    if result.returncode != 0:
-        context.log.warning(f"Monitoring warning: {result.stderr}")
-
-
-@job(name="monitoring_job")
-def monitoring_job():
-    run_monitoring_op()
+monitoring_job = define_asset_job(
+    name="monitoring_job_v2",
+    selection=["collect_monitoring"],
+)
 
 
 # ── Schedules ─────────────────────────────────────────────────────────────────
@@ -95,7 +84,7 @@ daily_schedule = ScheduleDefinition(
 )
 
 monitoring_schedule = ScheduleDefinition(
-    job=monitoring_job,
+    job_name="monitoring_job_v2",
     cron_schedule="0 * * * *",
 )
 
