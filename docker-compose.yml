@@ -56,7 +56,8 @@ services:
   dagster-webserver:
     build: .
     container_name: aq_dagster_webserver
-    command: dagster-webserver -h 0.0.0.0 -p 3000 -w dagster_pipeline/workspace.yaml
+    command: >
+      sh -c "rm -rf /dagster_home_v2/* && dagster-webserver -h 0.0.0.0 -p 3000 -w dagster_pipeline/workspace.yaml"
     ports:
       - "4903:3000"
     env_file: .env
@@ -75,7 +76,8 @@ services:
   dagster-daemon:
     build: .
     container_name: aq_dagster_daemon
-    command: dagster-daemon run -w dagster_pipeline/workspace.yaml
+    command: >
+      sh -c "sleep 5 && dagster-daemon run -w dagster_pipeline/workspace.yaml"
     env_file: .env
     environment:
       MLFLOW_TRACKING_URI: http://mlflow:5000
