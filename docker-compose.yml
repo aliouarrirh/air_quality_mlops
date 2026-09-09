@@ -46,8 +46,9 @@ services:
     env_file: .env
     environment:
       MLFLOW_TRACKING_URI: file:///app/ml/mlruns
+      DAGSTER_HOME: /dagster_home
     volumes:
-      - dagster_home:/root/.dagster
+      - dagster_home:/dagster_home
     depends_on:
       - mlflow
     networks:
@@ -61,8 +62,9 @@ services:
     env_file: .env
     environment:
       MLFLOW_TRACKING_URI: file:///app/ml/mlruns
+      DAGSTER_HOME: /dagster_home
     volumes:
-      - dagster_home:/root/.dagster
+      - dagster_home:/dagster_home
     depends_on:
       - mlflow
     networks:
