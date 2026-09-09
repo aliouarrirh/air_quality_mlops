@@ -18,6 +18,21 @@ services:
     networks:
       - air_quality_net
 
+  db-init:
+    image: postgres:15
+    container_name: aq_db_init
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: psql -h postgres -U postgres -d delhi_aq -f /init.sql
+    volumes:
+      - ./database/init.sql:/init.sql
+    environment:
+      PGPASSWORD: root
+    networks:
+      - air_quality_net
+    restart: "no"
+
   mlflow:
     image: ghcr.io/mlflow/mlflow:latest
     container_name: aq_mlflow
