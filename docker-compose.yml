@@ -56,17 +56,16 @@ services:
   dagster-webserver:
     build: .
     container_name: aq_dagster_webserver
-    command: >
-      sh -c "dagster instance migrate && dagster-webserver -h 0.0.0.0 -p 3000 -w dagster_pipeline/workspace.yaml"
+    command: dagster-webserver -h 0.0.0.0 -p 3000 -w dagster_pipeline/workspace.yaml
     ports:
       - "4903:3000"
     env_file: .env
     environment:
       MLFLOW_TRACKING_URI: http://mlflow:5000
-      DAGSTER_HOME: /dagster_home
+      DAGSTER_HOME: /dagster_home_v2
     volumes:
       - .:/app
-      - dagster_home:/dagster_home
+      - dagster_home_v2:/dagster_home_v2
     depends_on:
       - mlflow
     networks:
@@ -76,15 +75,14 @@ services:
   dagster-daemon:
     build: .
     container_name: aq_dagster_daemon
-    command: >
-      sh -c "dagster instance migrate && dagster-daemon run -w dagster_pipeline/workspace.yaml"
+    command: dagster-daemon run -w dagster_pipeline/workspace.yaml
     env_file: .env
     environment:
       MLFLOW_TRACKING_URI: http://mlflow:5000
-      DAGSTER_HOME: /dagster_home
+      DAGSTER_HOME: /dagster_home_v2
     volumes:
       - .:/app
-      - dagster_home:/dagster_home
+      - dagster_home_v2:/dagster_home_v2
     depends_on:
       - mlflow
     networks:
@@ -126,7 +124,7 @@ services:
 volumes:
   postgres_data:
   grafana_data:
-  dagster_home:
+  dagster_home_v2:
 
 networks:
   air_quality_net:
