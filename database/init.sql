@@ -70,7 +70,7 @@ SELECT
     ROUND((80 + 120 * RANDOM() + CASE WHEN n % 47 = 0 THEN 800 ELSE 0 END)::numeric, 1),
     CASE WHEN RANDOM() > 0.04 THEN 200 ELSE 503 END
 FROM generate_series(0, 287) AS n
-ON CONFLICT DO NOTHING;
+WHERE NOT EXISTS (SELECT 1 FROM service_health);
 
 -- ML metrics : snapshot toutes les 6h sur 72h
 INSERT INTO ml_metrics (datetime, model_name, metric_name, metric_value)
@@ -85,7 +85,7 @@ CROSS JOIN (VALUES
     ('mae',  29.48, 1.5),
     ('r2',   0.192, 0.02)
 ) AS m(metric_name, base, noise)
-ON CONFLICT DO NOTHING;
+WHERE NOT EXISTS (SELECT 1 FROM ml_metrics);
 
 -- Drift : toutes les 6h, sur pm25/pm10/no2
 INSERT INTO drift_metrics (datetime, feature, current_mean, baseline_mean, drift_score, is_drift)
@@ -102,7 +102,7 @@ CROSS JOIN (VALUES
     ('pm10',  210.0, 35.0, 20.0, 18.0),
     ('no2',    45.0, 10.0,  8.0,  5.0)
 ) AS f(feature, base_mean, variation, noise, baseline_std)
-ON CONFLICT DO NOTHING;
+WHERE NOT EXISTS (SELECT 1 FROM drift_metrics);
 
 -- Prédictions : 72h horaires
 INSERT INTO predictions (datetime, pm25_observe, pm25_predit, aqi_predit, aqi_category, depasse_naqi)
@@ -124,10 +124,12 @@ FROM generate_series(0, 71) AS n
 ON CONFLICT (datetime) DO NOTHING;
 
 -- Pipeline runs
-INSERT INTO pipeline_runs (run_at, statut, nouvelles_lignes, pm25_actuel, message) VALUES
+INSERT INTO pipeline_runs (run_at, statut, nouvelles_lignes, pm25_actuel, message)
+SELECT * FROM (VALUES
     (NOW() - '2 hours'::interval,  'OK',   24, 187.3, 'Ingestion CSV → DuckDB → dbt → 24 mesures'),
     (NOW() - '14 hours'::interval, 'OK',   24, 234.1, 'Ingestion CSV → DuckDB → dbt → 24 mesures'),
     (NOW() - '26 hours'::interval, 'OK',   24, 312.7, 'Ingestion CSV → DuckDB → dbt → 24 mesures'),
     (NOW() - '38 hours'::interval, 'OK',   24, 156.9, 'Ingestion CSV → DuckDB → dbt → 24 mesures'),
     (NOW() - '50 hours'::interval, 'WARN',  0,   NULL, 'Aucune nouvelle donnée source')
-ON CONFLICT DO NOTHING;
+) AS v
+WHERE NOT EXISTS (SELECT 1 FROM pipeline_runs);

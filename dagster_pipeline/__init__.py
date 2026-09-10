@@ -54,13 +54,15 @@ def train_model(context: AssetExecutionContext):
 
 @asset(group_name="monitoring", description="Collecte disponibilité, latence, métriques ML, dérive → PostgreSQL")
 def collect_monitoring(context: AssetExecutionContext):
+    import os
+    env = {**os.environ, "MLFLOW_TRACKING_URI": "http://mlflow:5000"}
     result = subprocess.run(
         [sys.executable, "pipeline/monitoring.py"],
-        capture_output=True, text=True,
+        capture_output=True, text=True, env=env,
     )
     context.log.info(result.stdout)
     if result.returncode != 0:
-        context.log.warning(f"Monitoring warning: {result.stderr}")
+        raise Exception(result.stderr)
     return {"status": "ok"}
 
 

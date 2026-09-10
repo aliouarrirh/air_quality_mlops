@@ -48,6 +48,7 @@ def collect_service_health(cur):
             "INSERT INTO service_health (endpoint, is_available, response_ms, status_code) VALUES (%s,%s,%s,%s)",
             (endpoint, ok, ms, code),
         )
+        print(f"[monitoring] health {endpoint}: status={code} {ms}ms ok={ok}")
 
 
 def collect_ml_metrics(cur):
@@ -63,12 +64,14 @@ def collect_ml_metrics(cur):
             experiment_ids=exp_ids, order_by=["start_time DESC"], max_results=1
         )
         if not runs:
+            print("[monitoring] ml_metrics: aucun run MLflow trouve")
             return
         for k, v in runs[0].data.metrics.items():
             cur.execute(
                 "INSERT INTO ml_metrics (model_name, metric_name, metric_value) VALUES (%s,%s,%s)",
                 ("DelhiAirQualityModel", k, v),
             )
+            print(f"[monitoring] ml_metric {k}={v}")
     except Exception as e:
         print(f"[monitoring] ml_metrics error: {e}")
 
@@ -85,6 +88,7 @@ def collect_drift(cur):
                 [feature]
             ).fetchone()
             if not row or row[0] is None:
+                print(f"[monitoring] drift {feature}: aucune donnee sur 24h")
                 continue
             current_mean = row[0]
             score = abs(current_mean - bl["mean"]) / bl["std"]
@@ -92,6 +96,7 @@ def collect_drift(cur):
                 "INSERT INTO drift_metrics (feature, current_mean, baseline_mean, drift_score, is_drift) VALUES (%s,%s,%s,%s,%s)",
                 (feature, round(current_mean, 2), bl["mean"], round(score, 3), score > 2),
             )
+            print(f"[monitoring] drift {feature}: mean={current_mean:.2f} score={score:.3f}")
         con.close()
     except Exception as e:
         print(f"[monitoring] drift error: {e}")
