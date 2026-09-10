@@ -56,18 +56,17 @@ services:
   dagster-webserver:
     build: .
     container_name: aq_dagster_webserver
-    command: >
-      sh -c "rm -rf /dagster_home_v2/* && dagster-webserver -h 0.0.0.0 -p 3000 -w dagster_pipeline/workspace.yaml"
+    command: dagster-webserver -h 0.0.0.0 -p 3000 -w dagster_pipeline/workspace.yaml
     ports:
       - "4903:3000"
     env_file: .env
     environment:
       MLFLOW_TRACKING_URI: http://mlflow:5000
-      DAGSTER_HOME: /dagster_home_v2
+      DAGSTER_HOME: /app/dagster_home
     volumes:
       - .:/app
-      - dagster_home_v2:/dagster_home_v2
     depends_on:
+      - postgres
       - mlflow
     networks:
       - air_quality_net
@@ -76,16 +75,15 @@ services:
   dagster-daemon:
     build: .
     container_name: aq_dagster_daemon
-    command: >
-      sh -c "sleep 5 && dagster-daemon run -w dagster_pipeline/workspace.yaml"
+    command: dagster-daemon run -w dagster_pipeline/workspace.yaml
     env_file: .env
     environment:
       MLFLOW_TRACKING_URI: http://mlflow:5000
-      DAGSTER_HOME: /dagster_home_v2
+      DAGSTER_HOME: /app/dagster_home
     volumes:
       - .:/app
-      - dagster_home_v2:/dagster_home_v2
     depends_on:
+      - postgres
       - mlflow
     networks:
       - air_quality_net
@@ -126,7 +124,6 @@ services:
 volumes:
   postgres_data:
   grafana_data:
-  dagster_home_v2:
 
 networks:
   air_quality_net:
