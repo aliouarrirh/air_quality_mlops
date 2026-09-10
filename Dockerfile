@@ -13,7 +13,7 @@ RUN pip install --no-cache-dir \
     duckdb numpy pandas python-dotenv joblib \
     "dagster==1.8.12" "dagster-webserver==1.8.12" "dagster-pipes==1.8.12" \
     psycopg2-binary \
-    dlt[duckdb] "dbt-duckdb==1.8.7" "dbt-core==1.8.7"
+    dlt[duckdb] dbt-duckdb
 
 # Copie tout le projet
 COPY . .
