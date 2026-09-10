@@ -61,7 +61,8 @@ def health():
 @app.post("/predict", response_model=PredictResponse)
 def predict(request: PredictRequest):
     """Endpoint prédiction AQI — obligatoire (règles §7)."""
-    model_uri = os.getenv("MLFLOW_MODEL_URI", "models:/DelhiAirQualityModel/Production")
+    # Les "stages" (Production/Staging) sont supprimes depuis MLflow 3.x -> version explicite
+    model_uri = os.getenv("MLFLOW_MODEL_URI", "models:/DelhiAirQualityModel/1")
     try:
         model = mlflow.pyfunc.load_model(model_uri)
     except Exception as e:

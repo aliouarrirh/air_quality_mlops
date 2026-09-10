@@ -88,8 +88,10 @@ def train():
             artifact_path="model",
             registered_model_name=MODEL_NAME,
         )
-        run_id = mlflow.active_run().info.run_id
-        model_uri = f"runs:/{run_id}/model"
+        client = mlflow.MlflowClient()
+        versions = client.search_model_versions(f"name='{MODEL_NAME}'")
+        latest = max(int(v.version) for v in versions)
+        model_uri = f"models:/{MODEL_NAME}/{latest}"
         print(f"  Modele enregistre : {model_uri}")
 
     print(f"\nDone. Modele '{MODEL_NAME}' disponible dans MLflow.")

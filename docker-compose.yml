@@ -49,6 +49,7 @@ services:
       MLFLOW_SERVER_CORS_ALLOWED_ORIGINS: "*"
     volumes:
       - ./ml:/mldata
+      - ./ml/mlruns:/mlruns
     networks:
       - air_quality_net
     restart: unless-stopped
@@ -67,6 +68,7 @@ services:
     volumes:
       - .:/app
       - ./ml:/mldata
+      - ./ml/mlruns:/mlruns
     depends_on:
       - postgres
       - mlflow
@@ -86,6 +88,7 @@ services:
     volumes:
       - .:/app
       - ./ml:/mldata
+      - ./ml/mlruns:/mlruns
     depends_on:
       - postgres
       - mlflow
@@ -104,6 +107,7 @@ services:
     volumes:
       - .:/app
       - ./ml:/mldata
+      - ./ml/mlruns:/mlruns
     depends_on:
       - mlflow
     networks:
