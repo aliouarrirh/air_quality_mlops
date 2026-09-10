@@ -1,8 +1,0 @@
-storage:
-  postgres:
-    postgres_db:
-      username: postgres
-      password: root
-      hostname: postgres
-      db_name: delhi_aq
-      port: 5432
