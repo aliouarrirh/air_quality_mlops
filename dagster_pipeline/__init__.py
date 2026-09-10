@@ -40,9 +40,11 @@ def run_dbt(context: AssetExecutionContext):
 @asset(group_name="ml", deps=["run_dbt"],
        description="Entraînement modèle ML + tracking MLflow")
 def train_model(context: AssetExecutionContext):
+    import os
+    env = {**os.environ, "MLFLOW_TRACKING_URI": os.getenv("MLFLOW_TRACKING_URI", "http://mlflow:5000")}
     result = subprocess.run(
         [sys.executable, "ml/train.py"],
-        capture_output=True, text=True,
+        capture_output=True, text=True, env=env,
     )
     context.log.info(result.stdout)
     if result.returncode != 0:
