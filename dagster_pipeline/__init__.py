@@ -24,15 +24,16 @@ def ingest_delhi_data(context: AssetExecutionContext):
 
 
 @asset(group_name="transform", deps=["ingest_delhi_data"],
-       description="Transformations dbt (run)")
+       description="Transformations dbt (run + test)")
 def run_dbt(context: AssetExecutionContext):
-    result = subprocess.run(
-        ["dbt", "run", "--project-dir", "dbt_project", "--profiles-dir", "dbt_project"],
-        capture_output=True, text=True,
-    )
-    context.log.info(result.stdout)
-    if result.returncode != 0:
-        raise Exception(result.stderr)
+    for cmd in [
+        ["dbt", "run",  "--project-dir", "dbt_project", "--profiles-dir", "dbt_project"],
+        ["dbt", "test", "--project-dir", "dbt_project", "--profiles-dir", "dbt_project"],
+    ]:
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        context.log.info(result.stdout)
+        if result.returncode != 0:
+            raise Exception(result.stderr)
     return {"status": "ok"}
 
 

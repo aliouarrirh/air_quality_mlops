@@ -11,9 +11,9 @@ RUN pip install --no-cache-dir \
     fastapi uvicorn[standard] pydantic \
     mlflow scikit-learn xgboost lightgbm \
     duckdb numpy pandas python-dotenv joblib \
-    "dagster==1.8.12" "dagster-webserver==1.8.12" "dagster-pipes==1.8.12" "protobuf>=4.25,<6" \
+    "dagster==1.8.12" "dagster-webserver==1.8.12" "dagster-pipes==1.8.12" \
     psycopg2-binary \
-    dlt[duckdb] dbt-duckdb
+    dlt[duckdb] "dbt-duckdb==1.8.7" "dbt-core==1.8.7"
 
 # Copie tout le projet
 COPY . .
