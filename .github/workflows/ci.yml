@@ -21,18 +21,23 @@ jobs:
         run: |
           pip install pytest pytest-cov httpx fastapi pydantic \
                       duckdb "dlt[duckdb]" scikit-learn mlflow numpy pandas \
-                      python-dotenv
+                      python-dotenv dbt-duckdb
 
       - name: Build DuckDB from CSV sources
         run: python pipeline/ingestion.py
 
+      - name: dbt run (cree mart_delhi_hourly)
+        run: |
+          dbt run \
+            --project-dir dbt_project \
+            --profiles-dir dbt_project
+
       - name: Run tests
         run: pytest tests/ -v --cov=api --cov=ml --cov-report=xml
 
-      - name: dbt compile check
+      - name: dbt test
         run: |
-          pip install dbt-duckdb
-          dbt compile \
+          dbt test \
             --project-dir dbt_project \
             --profiles-dir dbt_project
 
