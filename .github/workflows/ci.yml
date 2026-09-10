@@ -20,8 +20,11 @@ jobs:
       - name: Install dependencies
         run: |
           pip install pytest pytest-cov httpx fastapi pydantic \
-                      duckdb dlt scikit-learn mlflow numpy pandas \
+                      duckdb "dlt[duckdb]" scikit-learn mlflow numpy pandas \
                       python-dotenv
+
+      - name: Build DuckDB from CSV sources
+        run: python pipeline/ingestion.py
 
       - name: Run tests
         run: pytest tests/ -v --cov=api --cov=ml --cov-report=xml
