@@ -88,11 +88,13 @@ def train():
             artifact_path="model",
             registered_model_name=MODEL_NAME,
         )
-        print(f"  Modele enregistre : {model_info.model_uri}")
+        run_id = mlflow.active_run().info.run_id
+        model_uri = f"runs:/{run_id}/model"
+        print(f"  Modele enregistre : {model_uri}")
 
     print(f"\nDone. Modele '{MODEL_NAME}' disponible dans MLflow.")
-    print(f"Definir MLFLOW_MODEL_URI=runs:/{model_info.run_id}/model pour l'API.")
-    return model_info.model_uri
+    print(f"MLFLOW_MODEL_URI={model_uri}")
+    return model_uri
 
 if __name__ == "__main__":
     uri = train()
