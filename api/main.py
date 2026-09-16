@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
@@ -9,10 +10,37 @@ import os
 load_dotenv()
 mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "ml/mlruns"))
 
+# Les "stages" (Production/Staging) sont supprimes depuis MLflow 3.x -> version explicite
+MODEL_URI = os.getenv("MLFLOW_MODEL_URI", "models:/DelhiAirQualityModel/1")
+
+_model = None
+
+
+def get_model():
+    """Charge le modele depuis le registre MLflow, une seule fois par processus."""
+    global _model
+    if _model is None:
+        _model = mlflow.pyfunc.load_model(MODEL_URI)
+    return _model
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    try:
+        get_model()
+        print(f"[api] modele charge au demarrage : {MODEL_URI}")
+    except Exception as e:
+        # Demarrage non bloquant : MLflow peut ne pas encore repondre.
+        # get_model() retentera au premier appel de /predict.
+        print(f"[api] modele indisponible au demarrage ({e}) — nouvelle tentative a la 1ere requete")
+    yield
+
+
 app = FastAPI(
     title="Delhi Air Quality ML API",
     description="Prédiction AQI Delhi — OpenAQ v3 + NAQI",
     version="2.0.0",
+    lifespan=lifespan,
 )
 
 
@@ -50,21 +78,23 @@ def get_aqi_category(aqi: float) -> str:
 @app.get("/health")
 def health():
     """Endpoint santé — obligatoire (règles §7)."""
+    # Renvoie toujours 200 : le monitoring mesure la disponibilite du service,
+    # pas celle du modele, qui est rapportee separement via model_loaded.
     return {
         "status": "ok",
         "service": "delhi-air-quality-api",
         "city": "Delhi, India",
         "source": "OpenAQ v3",
+        "model_loaded": _model is not None,
+        "model_uri": MODEL_URI,
     }
 
 
 @app.post("/predict", response_model=PredictResponse)
 def predict(request: PredictRequest):
     """Endpoint prédiction AQI — obligatoire (règles §7)."""
-    # Les "stages" (Production/Staging) sont supprimes depuis MLflow 3.x -> version explicite
-    model_uri = os.getenv("MLFLOW_MODEL_URI", "models:/DelhiAirQualityModel/1")
     try:
-        model = mlflow.pyfunc.load_model(model_uri)
+        model = get_model()
     except Exception as e:
         raise HTTPException(status_code=503, detail=f"Modèle non disponible : {e}")
 
