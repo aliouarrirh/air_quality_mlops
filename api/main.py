@@ -10,25 +10,64 @@ import os
 load_dotenv()
 mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "ml/mlruns"))
 
-# Les "stages" (Production/Staging) sont supprimes depuis MLflow 3.x -> version explicite
-MODEL_URI = os.getenv("MLFLOW_MODEL_URI", "models:/DelhiAirQualityModel/1")
+MODEL_NAME = "DelhiAirQualityModel"
+CHAMPION_ALIAS = "champion"
+
+# Echappatoire : si MLFLOW_MODEL_URI est defini, il prime sur la resolution
+# par alias. Sinon l'API suit l'alias @champion, ce qui rend la promotion
+# depuis l'interface MLflow effective sans toucher a la configuration.
+MODEL_URI_OVERRIDE = os.getenv("MLFLOW_MODEL_URI") or None
 
 _model = None
+_model_version = None
+_model_source = None
+
+
+def resolve_model_uri():
+    """Determine quelle version servir.
+
+    Priorite : override explicite > alias @champion > version la plus recente.
+    Le repli sur la version la plus recente evite une API hors service tant
+    qu'aucun champion n'a encore ete promu.
+    """
+    if MODEL_URI_OVERRIDE:
+        return MODEL_URI_OVERRIDE, None, "override MLFLOW_MODEL_URI"
+
+    client = mlflow.MlflowClient()
+    try:
+        mv = client.get_model_version_by_alias(MODEL_NAME, CHAMPION_ALIAS)
+        return f"models:/{MODEL_NAME}@{CHAMPION_ALIAS}", mv.version, f"alias @{CHAMPION_ALIAS}"
+    except Exception:
+        versions = client.search_model_versions(f"name='{MODEL_NAME}'")
+        if not versions:
+            raise RuntimeError(f"aucune version enregistree pour {MODEL_NAME}")
+        latest = max(versions, key=lambda v: int(v.version))
+        return f"models:/{MODEL_NAME}/{latest.version}", latest.version, "derniere version (aucun champion promu)"
 
 
 def get_model():
     """Charge le modele depuis le registre MLflow, une seule fois par processus."""
-    global _model
+    global _model, _model_version, _model_source
     if _model is None:
-        _model = mlflow.pyfunc.load_model(MODEL_URI)
+        uri, version, source = resolve_model_uri()
+        _model = mlflow.pyfunc.load_model(uri)
+        _model_version, _model_source = version, source
+        print(f"[api] modele charge : {uri} (version {version}, {source})")
     return _model
+
+
+def reload_model():
+    """Vide le cache et recharge, pour prendre en compte une promotion."""
+    global _model
+    _model = None
+    get_model()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     try:
+        # get_model() journalise lui-meme l'URI, la version et le mode de resolution
         get_model()
-        print(f"[api] modele charge au demarrage : {MODEL_URI}")
     except Exception as e:
         # Demarrage non bloquant : MLflow peut ne pas encore repondre.
         # get_model() retentera au premier appel de /predict.
@@ -86,7 +125,27 @@ def health():
         "city": "Delhi, India",
         "source": "OpenAQ v3",
         "model_loaded": _model is not None,
-        "model_uri": MODEL_URI,
+        "model_name": MODEL_NAME,
+        "model_version": _model_version,
+        "model_resolution": _model_source,
+    }
+
+
+@app.post("/reload")
+def reload():
+    """Recharge le modele depuis le registre, sans redemarrer le conteneur.
+
+    A appeler apres avoir promu une nouvelle version en @champion.
+    """
+    try:
+        reload_model()
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"Rechargement impossible : {e}")
+    return {
+        "status": "reloaded",
+        "model_name": MODEL_NAME,
+        "model_version": _model_version,
+        "model_resolution": _model_source,
     }
 
 
@@ -118,5 +177,6 @@ def predict(request: PredictRequest):
         aqi_predicted=round(aqi, 1),
         aqi_category=get_aqi_category(aqi),
         confidence="high" if request.pm10 and request.no2 else "medium",
-        model_version=os.getenv("MODEL_VERSION", "2.0.0"),
+        # Version reelle issue du registre MLflow, et non une variable statique
+        model_version=str(_model_version) if _model_version else "inconnue",
     )

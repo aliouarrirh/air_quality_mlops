@@ -16,6 +16,7 @@ DUCKDB_PATH     = os.getenv("DUCKDB_PATH", "data/delhi_air_quality.duckdb")
 MLFLOW_URI      = os.getenv("MLFLOW_TRACKING_URI", "ml/mlruns")
 MODEL_NAME      = "DelhiAirQualityModel"
 EXPERIMENT_NAME = "delhi_air_quality"
+CHAMPION_ALIAS  = "champion"
 
 mlflow.set_tracking_uri(MLFLOW_URI)
 
@@ -115,7 +116,7 @@ def train():
         mlflow.log_metric("r2",   r2)
         print(f"  RMSE={rmse:.2f}  MAE={mae:.2f}  R²={r2:.3f}")
 
-        model_info = mlflow.xgboost.log_model(
+        mlflow.xgboost.log_model(
             model,
             artifact_path="model",
             registered_model_name=MODEL_NAME,
@@ -123,20 +124,37 @@ def train():
         client = mlflow.MlflowClient()
         versions = client.search_model_versions(f"name='{MODEL_NAME}'")
         latest = max(int(v.version) for v in versions)
-        model_uri = f"models:/{MODEL_NAME}/{latest}"
-        print(f"  Modele enregistre : {model_uri}")
+        print(f"  Modele enregistre : version {latest}")
+
+        # L'API suit l'alias @champion. On l'initialise sur la premiere version
+        # pour qu'elle ait quelque chose a servir, mais on ne le deplace jamais
+        # ensuite : promouvoir reste une decision explicite, prise apres avoir
+        # compare les metriques dans MLflow.
+        try:
+            current = client.get_model_version_by_alias(MODEL_NAME, CHAMPION_ALIAS)
+            print(f"  Champion inchange : version {current.version}")
+            print(f"  -> pour promouvoir la version {latest}, posez l'alias "
+                  f"'{CHAMPION_ALIAS}' dessus dans MLflow, puis POST /reload sur l'API")
+        except Exception:
+            client.set_registered_model_alias(MODEL_NAME, CHAMPION_ALIAS, latest)
+            print(f"  Aucun champion defini -> version {latest} promue automatiquement")
 
     print(f"\nDone. Modele '{MODEL_NAME}' disponible dans MLflow.")
-    print(f"MLFLOW_MODEL_URI={model_uri}")
-    return model_uri
+    return latest
 
 if __name__ == "__main__":
-    uri = train()
-    # Ecrire l'URI dans .env pour que l'API le trouve
+    version = train()
+
+    # L'API resout desormais le modele via l'alias @champion : l'URI ne change
+    # plus d'un entrainement a l'autre. On purge donc l'ancienne ligne, qui
+    # figerait l'API sur une version donnee et neutraliserait la promotion.
     env_path = ".env"
-    lines = open(env_path).readlines() if os.path.exists(env_path) else []
-    lines = [l for l in lines if not l.startswith("MLFLOW_MODEL_URI=")]
-    lines.append(f"MLFLOW_MODEL_URI={uri}\n")
-    with open(env_path, "w") as f:
-        f.writelines(lines)
-    print(f"MLFLOW_MODEL_URI mis a jour dans .env : {uri}")
+    if os.path.exists(env_path):
+        with open(env_path) as f:
+            lines = f.readlines()
+        kept = [line for line in lines if not line.startswith("MLFLOW_MODEL_URI=")]
+        if len(kept) != len(lines):
+            with open(env_path, "w") as f:
+                f.writelines(kept)
+            print("MLFLOW_MODEL_URI retire de .env (l'API suit l'alias @champion)")
+    print(f"Version entrainee : {version}")
