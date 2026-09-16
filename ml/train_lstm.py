@@ -4,8 +4,7 @@ import logging
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-import tensorflow as tf
+from sklearn.metrics import mean_squared_error, r2_score
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
 import mlflow
@@ -29,7 +28,9 @@ logging.basicConfig(
     ]
 )
 
-from mlops.mlflow_config import setup_mlflow
+# Import volontairement place apres sys.path.append : le package mlops n'est
+# resolvable qu'une fois la racine du projet ajoutee au chemin de recherche.
+from mlops.mlflow_config import setup_mlflow  # noqa: E402
 
 def create_sequences(data, target_col_idx, window_size):
     X, y = [], []
@@ -52,8 +53,10 @@ def train_model():
         'pm2p5_rolling_3h', 'pm2p5_rolling_24h', 
         'pm2p5_lag_1h', 'pm2p5_lag_2h', 'pm2p5_lag_24h'
     ]
-    if 'datetime' in df.columns: colonnes_a_enlever.append('datetime')
-    if 'index' in df.columns: colonnes_a_enlever.append('index')
+    if 'datetime' in df.columns:
+        colonnes_a_enlever.append('datetime')
+    if 'index' in df.columns:
+        colonnes_a_enlever.append('index')
     
     df_clean = df.drop(columns=colonnes_a_enlever, errors='ignore')
     

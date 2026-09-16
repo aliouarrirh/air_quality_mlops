@@ -5,7 +5,6 @@ Charge les données des stations Delhi depuis data/ dans DuckDB.
 import csv
 import dlt
 import os
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterator
 
