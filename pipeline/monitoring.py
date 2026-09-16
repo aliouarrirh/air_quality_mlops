@@ -2,7 +2,8 @@
 Collecte des métriques de monitoring → PostgreSQL.
 Appelé par Dagster toutes les heures.
 """
-import os, time, statistics
+import os
+import time
 import requests
 import psycopg2
 from dotenv import load_dotenv
@@ -83,8 +84,8 @@ def collect_drift(cur):
         con = duckdb.connect(DUCKDB_PATH, read_only=True)
         for feature, bl in BASELINE.items():
             row = con.execute(
-                f"SELECT AVG(value) FROM raw.delhi_measurements "
-                f"WHERE parameter=? AND datetime_utc >= NOW() - INTERVAL '24 hours'",
+                "SELECT AVG(value) FROM raw.delhi_measurements "
+                "WHERE parameter=? AND datetime_utc >= NOW() - INTERVAL '24 hours'",
                 [feature]
             ).fetchone()
             if not row or row[0] is None:
