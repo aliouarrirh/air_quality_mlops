@@ -12,12 +12,43 @@ import mlflow.xgboost
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
-DUCKDB_PATH   = os.getenv("DUCKDB_PATH", "data/delhi_air_quality.duckdb")
-MLFLOW_URI    = os.getenv("MLFLOW_TRACKING_URI", "ml/mlruns")
-MODEL_NAME    = "DelhiAirQualityModel"
+DUCKDB_PATH     = os.getenv("DUCKDB_PATH", "data/delhi_air_quality.duckdb")
+MLFLOW_URI      = os.getenv("MLFLOW_TRACKING_URI", "ml/mlruns")
+MODEL_NAME      = "DelhiAirQualityModel"
+EXPERIMENT_NAME = "delhi_air_quality"
 
 mlflow.set_tracking_uri(MLFLOW_URI)
-mlflow.set_experiment("delhi_air_quality")
+
+
+def setup_experiment():
+    """Selectionne l'experience en garantissant que ses artefacts partent bien
+    vers le stockage configure cote serveur.
+
+    Une experience conserve a vie l'artifact_location fixee a sa creation. Une
+    experience creee avant le passage a MinIO continue donc d'ecrire en file://,
+    ce qui rendrait le stockage objet inoperant. Dans ce cas on archive
+    l'ancienne sous un nom suffixe (operation non destructive : les runs sont
+    conserves) et on en recree une neuve, qui herite du stockage courant.
+    """
+    client = mlflow.MlflowClient()
+    exp = client.get_experiment_by_name(EXPERIMENT_NAME)
+
+    if exp and exp.artifact_location.startswith("file:"):
+        legacy = f"{EXPERIMENT_NAME}_legacy"
+        if client.get_experiment_by_name(legacy) is None:
+            print(f"  Experience '{EXPERIMENT_NAME}' pointe vers {exp.artifact_location}")
+            print(f"  -> archivage sous '{legacy}', recreation sur le stockage objet")
+            client.rename_experiment(exp.experiment_id, legacy)
+            exp = None
+        else:
+            print(f"  [!] '{legacy}' existe deja : conservation de l'experience actuelle")
+
+    if exp is None:
+        client.create_experiment(EXPERIMENT_NAME)
+
+    mlflow.set_experiment(EXPERIMENT_NAME)
+    location = client.get_experiment_by_name(EXPERIMENT_NAME).artifact_location
+    print(f"  Artefacts stockes dans : {location}")
 
 def load_data() -> pd.DataFrame:
     conn = duckdb.connect(DUCKDB_PATH, read_only=True)
@@ -50,6 +81,7 @@ def build_features(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
     return X, y
 
 def train():
+    setup_experiment()
     print("Chargement des données depuis mart_delhi_hourly...")
     df = load_data()
     print(f"  {len(df)} lignes chargées")
