@@ -1,11 +1,13 @@
 import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 import mlflow
 import mlflow.pyfunc
 import pandas as pd
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 
 load_dotenv()
@@ -118,6 +120,25 @@ def get_aqi_category(aqi: float) -> str:
     if aqi <= 400:
         return "Very Poor"
     return "Severe"
+
+
+UI_FILE = Path(__file__).parent / "static" / "index.html"
+
+
+@app.get("/", response_class=HTMLResponse, include_in_schema=False)
+def ui():
+    """Console d'inference — page statique servie par l'API elle-meme.
+
+    Le fichier est relu a chaque requete : combine au montage de volume du
+    conteneur, cela permet de corriger la page et de rafraichir le navigateur
+    sans redemarrer le service. Le chemin est resolu depuis __file__ et non
+    depuis le repertoire courant, qui differe entre l'execution locale et le
+    conteneur.
+    """
+    try:
+        return HTMLResponse(UI_FILE.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail=f"Interface introuvable : {UI_FILE}")
 
 
 @app.get("/health")

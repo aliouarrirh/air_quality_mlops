@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Delhi Air Quality — Console</title>
+<style>
+  :root {
+    --bg:        #f4f6f8;
+    --card:      #ffffff;
+    --border:    #dfe3e8;
+    --text:      #1f2933;
+    --muted:     #6b7683;
+    --accent:    #2563eb;
+    --accent-d:  #1d4ed8;
+    --ok:        #0f9d58;
+    --warn:      #d97706;
+    --err:       #c62828;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 24px 16px 48px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .wrap { max-width: 1040px; margin: 0 auto; }
+
+  header { margin-bottom: 24px; }
+  header h1 { margin: 0 0 4px; font-size: 24px; font-weight: 650; }
+  header p  { margin: 0; color: var(--muted); font-size: 14px; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+  @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .card h2 {
+    margin: 0 0 16px;
+    font-size: 15px;
+    font-weight: 650;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--muted);
+  }
+
+  /* --- panneau sante --- */
+  .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    padding: 7px 0;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  .row:last-child { border-bottom: none; }
+  .row .k { color: var(--muted); font-size: 13.5px; }
+  .row .v {
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 13.5px;
+    text-align: right;
+    word-break: break-word;
+  }
+
+  .dot {
+    display: inline-block;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    margin-right: 7px;
+    vertical-align: middle;
+    background: var(--muted);
+  }
+  .dot.ok  { background: var(--ok); }
+  .dot.err { background: var(--err); }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: system-ui, sans-serif;
+  }
+  .badge.ok   { background: #e3f4ea; color: #0b6b3c; }
+  .badge.warn { background: #fdf0dc; color: #92500a; }
+
+  /* --- formulaire --- */
+  .fields {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 560px) { .fields { grid-template-columns: repeat(2, 1fr); } }
+
+  label { display: block; }
+  label span {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  input, select {
+    width: 100%;
+    padding: 7px 9px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+  }
+  input:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
+  }
+
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+
+  button {
+    padding: 9px 18px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  button:disabled { opacity: .55; cursor: default; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:not(:disabled):hover { background: var(--accent-d); }
+  .btn-ghost {
+    background: #fff;
+    color: var(--text);
+    border-color: var(--border);
+  }
+  .btn-ghost:not(:disabled):hover { background: #f7f8fa; }
+
+  /* --- resultat --- */
+  #result { margin-top: 18px; }
+
+  .aqi-box {
+    border-radius: 10px;
+    padding: 18px;
+    color: #fff;
+    text-align: center;
+  }
+  .aqi-box .val {
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1.1;
+    font-family: ui-monospace, Consolas, monospace;
+  }
+  .aqi-box .cat { font-size: 16px; font-weight: 600; margin-top: 2px; }
+  .aqi-box .unit { font-size: 12px; opacity: .85; }
+
+  .meta {
+    display: flex;
+    justify-content: center;
+    gap: 22px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .meta b {
+    color: var(--text);
+    font-family: ui-monospace, Consolas, monospace;
+    font-weight: 600;
+  }
+
+  .msg {
+    padding: 11px 14px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    border: 1px solid transparent;
+  }
+  .msg.err  { background: #fdecec; border-color: #f5c4c4; color: #8c1d1d; }
+  .msg.ok   { background: #e8f5ee; border-color: #bfe3cd; color: #0b6b3c; }
+  .msg.wait { background: #eef2f7; border-color: var(--border); color: var(--muted); }
+  .msg code { font-family: ui-monospace, Consolas, monospace; }
+
+  footer {
+    margin-top: 24px;
+    font-size: 12.5px;
+    color: var(--muted);
+    text-align: center;
+  }
+  footer a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Delhi Air Quality — console d'inférence</h1>
+    <p>Prédiction du PM2.5 et catégorie NAQI · modèle servi depuis le registre MLflow</p>
+  </header>
+
+  <div class="grid">
+
+    <!-- ================= SANTE ================= -->
+    <section class="card">
+      <h2>État du service</h2>
+
+      <div class="row">
+        <span class="k">Statut</span>
+        <span class="v"><span id="h-dot" class="dot"></span><span id="h-status">…</span></span>
+      </div>
+      <div class="row">
+        <span class="k">Service</span>
+        <span class="v" id="h-service">…</span>
+      </div>
+      <div class="row">
+        <span class="k">Modèle chargé</span>
+        <span class="v" id="h-loaded">…</span>
+      </div>
+      <div class="row">
+        <span class="k">Modèle</span>
+        <span class="v" id="h-name">…</span>
+      </div>
+      <div class="row">
+        <span class="k">Version servie</span>
+        <span class="v" id="h-version">…</span>
+      </div>
+      <div class="row">
+        <span class="k">Mode de résolution</span>
+        <span class="v" id="h-resolution">…</span>
+      </div>
+
+      <div class="actions">
+        <button type="button" id="btn-reload" class="btn-ghost">Recharger le modèle</button>
+        <button type="button" id="btn-refresh" class="btn-ghost">Actualiser</button>
+      </div>
+
+      <div id="reload-msg" style="margin-top:14px"></div>
+    </section>
+
+    <!-- ================= PREDICTION ================= -->
+    <section class="card">
+      <h2>Prédiction</h2>
+
+      <form id="form">
+        <div class="fields">
+          <label><span>PM2.5 (µg/m³)</span><input name="pm25" type="number" step="0.1" min="0" max="999" value="145" required></label>
+          <label><span>PM10 (µg/m³)</span><input name="pm10" type="number" step="0.1" min="0" max="999" value="205"></label>
+          <label><span>NO2 (µg/m³)</span><input name="no2" type="number" step="0.1" min="0" value="42"></label>
+          <label><span>SO2 (µg/m³)</span><input name="so2" type="number" step="0.1" min="0" value="18"></label>
+          <label><span>CO (mg/m³)</span><input name="co" type="number" step="0.1" min="0" value="1.2"></label>
+          <label><span>O3 (µg/m³)</span><input name="o3" type="number" step="0.1" min="0" value="28"></label>
+          <label><span>Heure locale</span><input name="hour_local" type="number" min="0" max="23" value="10" required></label>
+          <label><span>Jour (0 = lundi)</span><input name="day_of_week" type="number" min="0" max="6" value="2" required></label>
+          <label><span>Mois</span><input name="month" type="number" min="1" max="12" value="1" required></label>
+          <label>
+            <span>Saison</span>
+            <select name="season" required>
+              <option value="winter" selected>Hiver</option>
+              <option value="summer">Été</option>
+              <option value="monsoon">Mousson</option>
+              <option value="post_monsoon">Post-mousson</option>
+            </select>
+          </label>
+          <label><span>Station (optionnel)</span><input name="location_id" type="number" min="0" placeholder="—"></label>
+        </div>
+
+        <div class="actions">
+          <button type="submit" id="btn-predict" class="btn-primary">Prédire</button>
+          <button type="button" id="btn-reset" class="btn-ghost">Valeurs par défaut</button>
+        </div>
+      </form>
+
+      <div id="result"></div>
+    </section>
+
+  </div>
+
+  <footer>
+    Contrat d'API auto-documenté : <a href="/docs">/docs</a> ·
+    <a href="/health">/health</a>
+  </footer>
+
+</div>
+
+<script>
+"use strict";
+
+// Seuils et couleurs officiels du NAQI indien (CPCB).
+// Les bornes reproduisent get_aqi_category() cote API : toute modification
+// doit etre repercutee dans api/main.py, sinon l'ecran et la reponse divergent.
+const NAQI = [
+  { max:  50, label: "Good",         fr: "Bon",           color: "#009966" },
+  { max: 100, label: "Satisfactory", fr: "Satisfaisant",  color: "#84b73f" },
+  { max: 200, label: "Moderate",     fr: "Modéré",        color: "#d4a017" },
+  { max: 300, label: "Poor",         fr: "Mauvais",       color: "#e06a10" },
+  { max: 400, label: "Very Poor",    fr: "Très mauvais",  color: "#c62828" },
+  { max: Infinity, label: "Severe",  fr: "Sévère",        color: "#7b1fa2" },
+];
+
+const DEFAUTS = {
+  pm25: 145, pm10: 205, no2: 42, so2: 18, co: 1.2, o3: 28,
+  hour_local: 10, day_of_week: 2, month: 1, season: "winter", location_id: "",
+};
+
+const $ = (id) => document.getElementById(id);
+
+function naqiStyle(categorie, valeur) {
+  const parCategorie = NAQI.find((n) => n.label === categorie);
+  if (parCategorie) return parCategorie;
+  // Repli si l'API introduit un libelle inconnu : on classe sur la valeur.
+  return NAQI.find((n) => valeur <= n.max);
+}
+
+/* ---------------------------------------------------------------- sante -- */
+
+async function chargerSante() {
+  try {
+    const r = await fetch("/health", { cache: "no-store" });
+    const d = await r.json();
+
+    const charge = d.model_loaded === true;
+    $("h-dot").className = "dot " + (charge ? "ok" : "err");
+    $("h-status").textContent = d.status ?? "?";
+    $("h-service").textContent = d.service ?? "—";
+    $("h-name").textContent = d.model_name ?? "—";
+    $("h-version").textContent = d.model_version ?? "—";
+    $("h-resolution").textContent = d.model_resolution ?? "—";
+
+    $("h-loaded").innerHTML = charge
+      ? '<span class="badge ok">oui</span>'
+      : '<span class="badge warn">non</span>';
+  } catch (e) {
+    $("h-dot").className = "dot err";
+    $("h-status").textContent = "injoignable";
+    for (const id of ["h-service", "h-loaded", "h-name", "h-version", "h-resolution"]) {
+      $(id).textContent = "—";
+    }
+  }
+}
+
+/* --------------------------------------------------------------- reload -- */
+
+$("btn-reload").addEventListener("click", async () => {
+  const btn = $("btn-reload");
+  const zone = $("reload-msg");
+
+  btn.disabled = true;
+  zone.innerHTML = '<div class="msg wait">Rechargement depuis le registre…</div>';
+
+  try {
+    const r = await fetch("/reload", { method: "POST" });
+    const d = await r.json();
+
+    if (!r.ok) {
+      zone.innerHTML = '<div class="msg err">' + echapper(d.detail ?? r.status) + "</div>";
+    } else {
+      zone.innerHTML =
+        '<div class="msg ok">Modèle rechargé — version <code>' +
+        echapper(d.model_version ?? "?") + "</code> (" + echapper(d.model_resolution ?? "?") + ")</div>";
+    }
+  } catch (e) {
+    zone.innerHTML = '<div class="msg err">Appel impossible : ' + echapper(e.message) + "</div>";
+  } finally {
+    btn.disabled = false;
+    chargerSante();
+  }
+});
+
+$("btn-refresh").addEventListener("click", chargerSante);
+
+/* ------------------------------------------------------------ prediction -- */
+
+$("form").addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+
+  const btn = $("btn-predict");
+  const zone = $("result");
+  const payload = {};
+
+  for (const [cle, brut] of new FormData(ev.target).entries()) {
+    const valeur = String(brut).trim();
+    if (valeur === "") continue;            // champ optionnel laisse vide
+    payload[cle] = cle === "season" ? valeur : Number(valeur);
+  }
+
+  btn.disabled = true;
+  zone.innerHTML = '<div class="msg wait">Appel de /predict…</div>';
+
+  try {
+    const r = await fetch("/predict", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const d = await r.json();
+
+    if (!r.ok) {
+      zone.innerHTML = '<div class="msg err">' + messageErreur(r.status, d) + "</div>";
+      return;
+    }
+
+    const style = naqiStyle(d.aqi_category, d.aqi_predicted);
+    zone.innerHTML =
+      '<div class="aqi-box" style="background:' + style.color + '">' +
+        '<div class="val">' + d.aqi_predicted + '</div>' +
+        '<div class="unit">µg/m³ — PM2.5 prédit</div>' +
+        '<div class="cat">' + style.fr + " · " + echapper(d.aqi_category) + '</div>' +
+      "</div>" +
+      '<div class="meta">' +
+        "<span>confiance <b>" + echapper(d.confidence) + "</b></span>" +
+        "<span>version du modèle <b>" + echapper(d.model_version) + "</b></span>" +
+      "</div>";
+  } catch (e) {
+    zone.innerHTML = '<div class="msg err">Appel impossible : ' + echapper(e.message) + "</div>";
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+$("btn-reset").addEventListener("click", () => {
+  const form = $("form");
+  for (const [cle, valeur] of Object.entries(DEFAUTS)) {
+    if (form.elements[cle]) form.elements[cle].value = valeur;
+  }
+  $("result").innerHTML = "";
+});
+
+/* ------------------------------------------------------------- outillage -- */
+
+function echapper(v) {
+  const d = document.createElement("div");
+  d.textContent = String(v);
+  return d.innerHTML;
+}
+
+function messageErreur(status, corps) {
+  const detail = corps && corps.detail;
+
+  // 422 : erreurs de validation Pydantic, renvoyees sous forme de liste
+  if (Array.isArray(detail)) {
+    return "Saisie invalide — " + echapper(
+      detail.map((e) => (e.loc || []).slice(1).join(".") + " : " + e.msg).join(" ; ")
+    );
+  }
+  if (typeof detail === "string") return echapper(detail);
+  return "Erreur HTTP " + status;
+}
+
+/* ---------------------------------------------------------------- demarrage */
+
+chargerSante();
+setInterval(chargerSante, 15000);
+</script>
+</body>
+</html>
