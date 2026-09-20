@@ -1,12 +1,13 @@
+import logging
 import os
 import sys
-import logging
+
+import mlflow
+import mlflow.prophet
 import numpy as np
 import pandas as pd
 from prophet import Prophet
 from sklearn.metrics import mean_squared_error, r2_score
-import mlflow
-import mlflow.prophet
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
@@ -29,6 +30,7 @@ logging.basicConfig(
 # Import volontairement place apres sys.path.append : le package mlops n'est
 # resolvable qu'une fois la racine du projet ajoutee au chemin de recherche.
 from mlops.mlflow_config import setup_mlflow  # noqa: E402
+
 
 def train_model():
     logging.info("Démarrage de l'entraînement Prophet (Statistiques Temporelles)...")

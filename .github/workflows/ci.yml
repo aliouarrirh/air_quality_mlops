@@ -67,5 +67,5 @@ jobs:
           python-version: '3.11'
       - name: Lint with ruff
         run: |
-          pip install ruff
+          pip install ruff==0.16.8
           ruff check api/ ml/ pipeline/ dagster_pipeline/

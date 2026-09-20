@@ -1,14 +1,15 @@
+import logging
 import os
 import sys
-import logging
-import numpy as np
-import pandas as pd
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.metrics import mean_squared_error, r2_score
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense, Dropout
+
 import mlflow
 import mlflow.tensorflow
+import numpy as np
+import pandas as pd
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.preprocessing import MinMaxScaler
+from tensorflow.keras.layers import LSTM, Dense, Dropout
+from tensorflow.keras.models import Sequential
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
@@ -31,6 +32,7 @@ logging.basicConfig(
 # Import volontairement place apres sys.path.append : le package mlops n'est
 # resolvable qu'une fois la racine du projet ajoutee au chemin de recherche.
 from mlops.mlflow_config import setup_mlflow  # noqa: E402
+
 
 def create_sequences(data, target_col_idx, window_size):
     X, y = [], []

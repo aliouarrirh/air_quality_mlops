@@ -1,0 +1,20 @@
+# Configuration explicite du linter.
+# Sans ce fichier, ruff applique son jeu de regles par defaut, qui varie d'une
+# version a l'autre : une nouvelle version publiee sur PyPI peut faire echouer
+# la CI alors qu'aucune ligne de code n'a change. On fige donc ici les regles
+# appliquees, et la version de ruff est epinglee dans .github/workflows/ci.yml.
+
+target-version = "py311"
+line-length = 120
+
+[lint]
+select = [
+    "E4",  # imports (shadowing, imports multiples sur une ligne)
+    "E7",  # erreurs de style structurelles (comparaisons, instructions)
+    "E9",  # erreurs de syntaxe et d'execution
+    "F",   # pyflakes : variables non definies, imports inutilises
+    "I",   # ordre et regroupement des imports
+]
+
+[lint.isort]
+known-first-party = ["api", "ml", "mlops", "pipeline", "dagster_pipeline"]

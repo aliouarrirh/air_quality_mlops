@@ -4,8 +4,9 @@ Appelé par Dagster toutes les heures.
 """
 import os
 import time
-import requests
+
 import psycopg2
+import requests
 from dotenv import load_dotenv
 
 load_dotenv()

@@ -3,10 +3,11 @@ Pipeline dlt — Delhi Air Quality via fichiers CSV locaux
 Charge les données des stations Delhi depuis data/ dans DuckDB.
 """
 import csv
-import dlt
 import os
 from pathlib import Path
 from typing import Iterator
+
+import dlt
 
 DATA_DIR    = Path(os.getenv("DATA_DIR", "data"))
 DUCKDB_PATH = os.getenv("DUCKDB_PATH", "data/delhi_air_quality.duckdb")

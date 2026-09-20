@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 
+
 class AirQualityInput(BaseModel):
     pm10: float = Field(..., description="Particules PM10 en µg/m³", example=45.2)
     no2: float = Field(..., description="Dioxyde d'azote en µg/m³", example=20.5)

@@ -4,9 +4,9 @@ Basé sur les vraies stations CPCB Delhi avec valeurs réalistes.
 Remplace l'API OpenAQ pour le développement/démo.
 """
 import csv
+import math
 import os
 import random
-import math
 from datetime import datetime, timedelta, timezone
 
 DATA_DIR = "data"
