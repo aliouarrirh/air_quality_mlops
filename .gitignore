@@ -8,3 +8,5 @@ api_stdout.log
 api_stderr.log
 dbt_project/.user.yml
 dbt_project/target/
+# Fichiers temporaires Office (verrous crees quand un document est ouvert)
+~$*
